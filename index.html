@@ -69,22 +69,16 @@ html[data-theme="light"] {
 }
 
 /* ================================================================
-EFEKTY SZKŁA: liquid (dużo przezroczystości) / frosted (mleczne);
-okna dostają tę samą falę, ale z bazą --win.
+EFEKT SZKŁA: płynna przezroczystość (--glass-alpha z suwaka) plus
+przełącznik mrożenia (data-frost). Okna mają tę samą falę z bazą --win.
 ================================================================ */
-html[data-effect="liquid"] .glass {
-background: color-mix(in srgb, var(--glass-base, var(--dock)) 30%, transparent) !important;
-backdrop-filter: blur(18px) saturate(1.5);
--webkit-backdrop-filter: blur(18px) saturate(1.5);
+html .glass {
+background: color-mix(in srgb, var(--glass-base, var(--dock)) var(--glass-alpha, 38%), transparent) !important;
+backdrop-filter: blur(20px) saturate(1.4);
+-webkit-backdrop-filter: blur(20px) saturate(1.4);
 }
-html[data-effect="frosted"] .glass {
-background: color-mix(in srgb, var(--glass-base, var(--dock)) 60%, transparent) !important;
-backdrop-filter: blur(22px) saturate(1.3);
--webkit-backdrop-filter: blur(22px) saturate(1.3);
-}
-html[data-effect="none"] .glass { backdrop-filter:none !important; -webkit-backdrop-filter:none !important; }
-html[data-effect="liquid"] .window,
-html[data-effect="frosted"] .window { --glass-base: var(--win); }
+html[data-frost="off"] .glass { backdrop-filter:none !important; -webkit-backdrop-filter:none !important; background: var(--glass-base, var(--dock)) !important; }
+.window { --glass-base: var(--win); }
 
 * { box-sizing:border-box; margin:0; padding:0; }
 html, body { height:100%; }
@@ -143,9 +137,15 @@ z-index:60; cursor:pointer;
 .toppill .badge { min-width:16px; height:16px; padding:0 4px; border-radius:999px; background:var(--accent); color:#fff; font-size:10px; font-weight:700; display:grid; place-items:center; }
 
 /* ================================================================
-PRZEŁĄCZNIK EFEKTU (panel koncepcyjny, prawy górny róg)
+PRZEŁĄCZNIK EFEKTU — suwak przezroczystości + mrożenie (prawy górny róg)
 ================================================================ */
-.switcher { position:fixed; top:14px; right:14px; z-index:70; display:flex; gap:5px; padding:6px; border-radius:12px; }
+.switcher { position:fixed; top:14px; right:14px; z-index:70; display:flex; align-items:center; gap:9px; padding:8px 12px; border-radius:12px; }
+.switcher .fxic { display:grid; place-items:center; color:var(--ink-2); flex-shrink:0; }
+.switcher .fxic svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; }
+.switcher input[type="range"] { width:110px; }
+.switcher .sval { width:34px; text-align:right; font-size:11.5px; font-weight:700; color:var(--ink-2); }
+.switcher .fxdiv { width:1px; height:20px; background:var(--border); flex-shrink:0; }
+.switcher .fxlab { font-size:10.5px; font-weight:600; color:var(--ink-3); white-space:nowrap; }
 .glass.panel { background:var(--pill); border:1px solid var(--border); }
 .btn { font-size:10.5px; font-weight:600; color:var(--ink-2); background:transparent; border:none; border-radius:8px; padding:5px 10px; cursor:pointer; transition:all .2s var(--ease); }
 .btn:hover { background:var(--hover); color:var(--ink); }
@@ -394,23 +394,16 @@ border-radius:50%; border:none; background:#e5484d; color:#fff;
 font-size:11px; line-height:1; cursor:pointer; z-index:3;
 }
 .dock.editing .rm { display:grid; place-items:center; }
-.dockedit {
-width:34px; height:34px; border-radius:10px; flex-shrink:0;
-border:1px solid var(--border); background:var(--dock); color:var(--ink-3);
-display:grid; place-items:center; cursor:pointer; opacity:0;
-transition:opacity .2s, background .2s, color .2s;
-}
-.dock:hover .dockedit { opacity:1; }
-.dockedit:hover, .dockedit.on { color:var(--ink); background:var(--hover); }
-.dockedit.on { opacity:1; color:#fff; background:var(--accent); }
-.dockedit svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; }
-.dockadd {
-display:none; align-items:center; justify-content:center; flex-shrink:0;
-width:34px; height:34px; border-radius:10px;
-border:1.5px dashed var(--border-strong,var(--border)); background:var(--dock);
-color:var(--ink-2); font-size:16px; cursor:pointer;
-}
-.dock.editing .dockadd { display:grid; }
+
+/* Sekcje głównego doku i przypięte skróty */
+.dockapps { display:flex; align-items:center; gap:8px; }
+.dockfolder { position:relative; }
+.chips { display:flex; flex-wrap:wrap; gap:8px; padding:4px 0 2px; }
+.pchip { display:flex; align-items:center; gap:7px; border:none; background:transparent; color:var(--ink-2); font-size:11.5px; font-weight:600; font-family:var(--font); padding:6px 10px; border-radius:999px; cursor:pointer; transition:background .15s, color .15s; }
+.pchip:hover { background:var(--hover); color:var(--ink); }
+.pchip.sel { background:var(--btn); color:var(--ink); }
+.pchip .cdot { width:9px; height:9px; border-radius:3px; background:var(--chipc,#888); flex-shrink:0; box-shadow:inset 0 1px 1px rgba(255,255,255,.4); }
+.pchip.sel .cdot { outline:2px solid color-mix(in srgb, var(--accent) 55%, transparent); outline-offset:2px; }
 
 /* Logo systemu (zamiast kulki) + separator */
 .syslogo {
@@ -625,7 +618,7 @@ html.tint .window:not(.focused):not(.hidden) { box-shadow:var(--sh-2), 0 6px 20p
 .toppill:hover { filter:brightness(1.12); }
 
 /* Kropka „uruchomiona" pod ikoną w doku + ✕ na miniaturze okna */
-.dot-run { position:absolute; bottom:-7px; left:50%; transform:translateX(-50%); width:4.5px; height:4.5px; border-radius:50%; background:var(--ink-2); opacity:0; transition:opacity .25s; box-shadow:0 1px 2px rgba(0,0,0,.35); }
+.dot-run { position:absolute; bottom:-7px; left:50%; transform:translateX(-50%); width:4.5px; height:4.5px; border-radius:50%; background:var(--accent); opacity:0; transition:opacity .25s; box-shadow:0 1px 2px rgba(0,0,0,.35); }
 .dot-run.on { opacity:.9; }
 .wthumb .tclose { position:absolute; top:3px; right:3px; width:14px; height:14px; border:none; border-radius:50%; background:rgba(0,0,0,.55); color:#fff; font-size:8px; line-height:1; display:grid; place-items:center; cursor:pointer; opacity:0; transition:opacity .15s, background .15s; padding:0; }
 .wthumb:hover .tclose { opacity:1; }
@@ -784,9 +777,12 @@ html[data-theme="light"] .syslogo { background:#000; }
 </div>
 
 <div class="switcher glass panel">
-<button class="btn fx-btn active" data-fx="liquid">liquid glass</button>
-<button class="btn fx-btn" data-fx="frosted">frosted glass</button>
-<button class="btn fx-btn" data-fx="none">brak</button>
+<span class="fxic"><svg viewBox="0 0 24 24"><rect x="4.5" y="4.5" width="15" height="15" rx="4"/><path d="M8 14.5c2.6-4.2 5.4-4.2 8 0" opacity=".7"/></svg></span>
+<input type="range" id="glassalpha" min="12" max="85" value="38" />
+<span class="sval" id="glassval">38%</span>
+<span class="fxdiv"></span>
+<span class="fxlab">Mrożenie</span>
+<button class="tgl on" id="frosttgl" aria-label="Efekt mrożenia"><i></i></button>
 <span style="width:1px;height:16px;background:var(--border)"></span>
 <button class="btn theme-btn neutral active" data-theme="dark">ciemny</button>
 <button class="btn theme-btn neutral" data-theme="light">jasny</button>
@@ -829,6 +825,7 @@ Filer
 <button class="fnav"><svg viewBox="0 0 24 24"><path d="M5 4.5h9l4 4V19a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 19V6a1.5 1.5 0 0 1 1-1.5z"/></svg>Documents</button>
 <button class="fnav"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5"/><path d="M5 19h14"/></svg>Downloads</button>
 <button class="fnav"><svg viewBox="0 0 24 24"><rect x="3.5" y="6" width="17" height="12.5" rx="2"/><path d="M8.5 6l1.5-2h4L15.5 6"/><circle cx="12" cy="12.2" r="2.8"/></svg>Pictures</button>
+<button class="fnav"><svg viewBox="0 0 24 24"><path d="M4 13.5a8 8 0 0 1 16 0"/><rect x="3" y="13" width="4" height="6.5" rx="1.6"/><rect x="17" y="13" width="4" height="6.5" rx="1.6"/></svg>Muzyka</button>
 <button class="fnav active"><svg viewBox="0 0 24 24"><path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h4L11 8h7.5A1.5 1.5 0 0 1 20 9.5v7A1.5 1.5 0 0 1 18.5 18h-13A1.5 1.5 0 0 1 4 16.5z"/></svg>Projects</button>
 <div class="fsep"></div>
 <button class="fnav"><span class="u"></span>Fable SSD</button>
@@ -947,6 +944,23 @@ Settings
 <div class="tgl on" id="tinttgl"><i></i></div>
 </div>
 </div>
+<div class="sech">Dock</div>
+<div class="card glass">
+<div class="trow">
+<div><div class="lab">Tryb aranżacji wysp</div><div class="hint">Przeciągaj wyspy doka, aby zmienić ich kolejność</div></div>
+<div class="tgl" id="arrangearr"><i></i></div>
+</div>
+<div class="sech2" style="margin-top:16px">Wyspy doka</div>
+<div class="trow"><div class="lab">Aplikacje</div><div class="tgl" data-isl="apps"><i></i></div></div>
+<div class="trow"><div class="lab">Szybki dostęp</div><div class="tgl" data-isl="quick"><i></i></div></div>
+<div class="trow"><div class="lab">Uruchomione okna</div><div class="tgl" data-isl="windows"><i></i></div></div>
+<div class="trow"><div class="lab">Sieć / QS</div><div class="tgl" data-isl="net"><i></i></div></div>
+<div class="trow"><div class="lab">Zegar / Kalendarz</div><div class="tgl" data-isl="clock"><i></i></div></div>
+<div class="sech2" style="margin-top:16px">Ulubione aplikacje w doku</div>
+<div class="chips" id="dockpins"></div>
+<div class="sech2" style="margin-top:16px">Szybki dostęp — przypięte foldery</div>
+<div class="chips" id="quickpins"></div>
+</div>
 </div>
 
 <!-- Pływający pasek narzędzi Ustawień — ta sama klasa/warstwa co w Filerze -->
@@ -967,6 +981,9 @@ Settings
 <img src="assets/suno-logo.jpg" alt="Logo SunoOS" draggable="false" />
 </div>
 <span class="divider"></span>
+<div class="dockapps" id="dock-pins"></div>
+<span class="divider" id="secrest"></span>
+<div class="dockapps" id="dock-rest"></div>
 <div class="aicon ic-blue" data-open="win-filer" title="Filer"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h4l2 2.5h7A1.5 1.5 0 0 1 20 9v8.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><path d="M4 10.5h16" stroke="rgba(255,255,255,.55)"/></svg><span class="dot-run"></span></div>
 <div class="aicon ic-indigo" data-open="win-airdrop" title="Airdrop"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l3.5 8.5L12 21l-3.5-9.5z"/><path d="M6 21c2-1 4-1 6 0 2-1 4-1 6 0" stroke="rgba(255,255,255,.6)"/></svg><span class="dot-run"></span></div>
 <div class="aicon ic-slate" data-open="win-stats" title="Statystyki"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M5 19V10M12 19V5M19 19v-7"/></svg><span class="dot-run"></span></div>
@@ -977,6 +994,14 @@ Settings
 <div class="cal-icon" title="Kalendarz" id="calicon"><span class="m" id="calM">LIS</span><span class="d" id="calD">27</span></div>
 <div class="aicon ic-slate" data-open="win-settings" title="Ustawienia"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.1"/><path d="M12 2.8v2.7M12 18.5v2.7M2.8 12h2.7M18.5 12h2.7M5.4 5.4l1.9 1.9M16.7 16.7l1.9 1.9M18.6 5.4l-1.9 1.9M7.3 16.7l-1.9 1.9"/></svg><span class="dot-run"></span></div>
 <div class="aicon ic-green" data-open="win-work" title="Obszary robocze"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5-8 4.5-8-4.5z"/><path d="M4 12.5l8 4.5 8-4.5" stroke="rgba(255,255,255,.6)"/><path d="M4 16.5l8 4.5 8-4.5" stroke="rgba(255,255,255,.35)"/></svg><span class="dot-run"></span></div>
+</div>
+
+<!-- Wyspa szybkiego dostępu: przypięte foldery -->
+<div class="island glass" data-widget="quick" id="isl-quick">
+<div class="aicon dockfolder ic-blue" data-nav="Documents" title="Dokumenty"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h4l2 2.5h7A1.5 1.5 0 0 1 20 9v8.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><path d="M4 10.5h16" stroke="rgba(255,255,255,.55)"/></svg></div>
+<div class="aicon dockfolder ic-teal" data-nav="Downloads" title="Pobrane"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h4l2 2.5h7A1.5 1.5 0 0 1 20 9v8.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><path d="M12 9.5v4M9.8 11.5l2.2 2.2 2.2-2.2" stroke="rgba(255,255,255,.85)"/></svg></div>
+<div class="aicon dockfolder ic-coral" data-nav="Pictures" title="Obrazy"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h4l2 2.5h7A1.5 1.5 0 0 1 20 9v8.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="9.2" cy="12.6" r="1.2" stroke="rgba(255,255,255,.85)"/><path d="M6.5 16l3.2-2.8 2.4 2 2.2-1.8 3.2 2.6" stroke="rgba(255,255,255,.85)"/></svg></div>
+<div class="aicon dockfolder ic-amber" data-nav="Music" title="Muzyka"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h4l2 2.5h7A1.5 1.5 0 0 1 20 9v8.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><circle cx="14.4" cy="13.2" r="1.5" stroke="rgba(255,255,255,.85)"/><path d="M15.9 13.2V8.6l-5 .9" stroke="rgba(255,255,255,.85)"/></svg></div>
 </div>
 
 <div class="island glass" data-widget="windows" id="isl-windows">
@@ -1076,17 +1101,6 @@ Settings
 </div>
 </div>
 
-<button class="dockedit" id="dockedit" title="Aranżuj wyspy">
-<svg viewBox="0 0 24 24"><path d="M4 20l4-1L19.5 7.5a2.1 2.1 0 0 0-3-3L5 16z"/><path d="M14 6l3 3"/></svg>
-</button>
-<button class="dockadd" id="dockadd" title="Przywróć wyspę">+</button>
-</div>
-
-<div class="addmenu glass" id="addmenu" style="background:var(--win)">
-<button data-add="apps">Aplikacje</button>
-<button data-add="windows">Uruchomione okna</button>
-<button data-add="net">Sieć / QS</button>
-<button data-add="clock">Zegar / Kalendarz</button>
 </div>
 
 <div class="addmenu glass" id="powermenu">
@@ -1313,13 +1327,17 @@ updateWinCount();
 updateThumbs();
 });
 
-/* ============ EFEKT SZKŁA + MOTYW (skrót i karty w Settings) ============ */
-const fxBtns = document.querySelectorAll('.fx-btn');
-fxBtns.forEach(b => b.addEventListener('click', () => {
-fxBtns.forEach(x => x.classList.toggle('active', x === b));
-root.dataset.effect = b.dataset.fx;
-savePrefs();
-}));
+/* ============ EFEKT SZKŁA (suwak + mrożenie) + MOTYW ============ */
+const glassRange = $('glassalpha'), glassVal = $('glassval'), frostTgl = $('frosttgl');
+function applyGlass() {
+root.style.setProperty('--glass-alpha', glassRange.value + '%');
+root.dataset.frost = frostTgl.classList.contains('on') ? 'on' : 'off';
+glassRange.style.setProperty('--fill', glassRange.value + '%');
+glassVal.textContent = glassRange.value + '%';
+}
+glassRange.addEventListener('input', () => { applyGlass(); savePrefs(); }, { passive:true });
+frostTgl.addEventListener('click', () => { frostTgl.classList.toggle('on'); applyGlass(); savePrefs(); });
+applyGlass();
 
 const themeBtns = document.querySelectorAll('.theme-btn');
 const themeCards = document.querySelectorAll('.theme-card');
@@ -1357,7 +1375,8 @@ localStorage.setItem('suno-prefs', JSON.stringify({
 theme: sysFollow ? null : root.dataset.theme,
 accent: acc ? acc.dataset.color : null,
 bg: root.dataset.bg,
-effect: root.dataset.effect,
+glass: +glassRange.value,
+frost: frostTgl.classList.contains('on'),
 tint: root.classList.contains('tint'),
 nl: nlBtn ? nlBtn.classList.contains('on') : false,
 }));
@@ -1471,6 +1490,11 @@ FILES.unshift({ t:'folder', nm:'Nowy folder', meta:'0 items', ty:'Folder', dt:d.
 renderFiles($('fsearch').value.trim().toLowerCase() || null);
 });
 renderFiles(null);
+
+/* Nawigacja Filer: aktywacja pozycji sidebaru (skrót też z doka) */
+document.querySelectorAll('#win-filer .fnav').forEach(b => b.addEventListener('click', () => {
+document.querySelectorAll('#win-filer .fnav').forEach(x => x.classList.toggle('active', x === b));
+}));
 
 /* ============ ZEGAR 12h + DATA + KAFCI QS ============ */
 const DOW = ['niedziela','poniedziałek','wtorek','środa','czwartek','piątek','sobota'];
@@ -1597,42 +1621,121 @@ pushMsg(0, 'me', v);
 }
 
 /* ================================================================
-ARANŻACJA DOKU: tryb ołówka → drag&drop wysp + ukrywanie + ⊕
-Kolejność zapisywana w localStorage (sprawa opcjonalna: sandbox
-może blokować storage, stąd try/catch).
+DOK: zarządzanie wyspami wyłącznie z Ustawień (tryb aranżacji +
+widoczność). Główny dok = menu | przypięte aplikacje | pozostałe;
+obok wyspa szybkiego dostępu z przypiętymi folderami. Kolejność,
+widoczność i przypięcia w localStorage (try/catch na sandbox).
 ================================================================ */
-const dock = $('dock'), editBtn = $('dockedit'), addBtn = $('dockadd'), addMenu = $('addmenu');
+const dock = $('dock');
 let editOn = false, dragEl = null;
+const DEF_APPPINS = ['Filer', 'Czat', 'Notatki', 'Ustawienia'];
+const DEF_QUICKPINS = ['Dokumenty', 'Pobrane', 'Obrazy', 'Muzyka'];
+let appPins = [...DEF_APPPINS], quickPins = [...DEF_QUICKPINS];
+
+const dockPinned = $('dock-pins'), dockRest = $('dock-rest'), secRest = $('secrest');
+const dockAppIcons = [...document.querySelectorAll('#isl-apps .aicon, #isl-apps .cal-icon')];
+const quickIcons = [...document.querySelectorAll('#isl-quick .dockfolder')];
+
 function saveDock() {
 try {
 localStorage.setItem('suno-dock', JSON.stringify({
-order: [...dock.querySelectorAll('.island,[data-widget]')].filter(n => n.dataset.widget).map(n => n.dataset.widget),
+order: [...dock.querySelectorAll('[data-widget]')].map(n => n.dataset.widget),
 hidden: [...dock.querySelectorAll('[data-widget]')].filter(n => n.style.display === 'none').map(n => n.dataset.widget),
+appPins: appPins,
+quickPins: quickPins,
 }));
 } catch (e) { /* storage niedostępny — tryb tylko na sesję */ }
 }
 function restoreDock() {
-let data;
+let data = null;
 try { data = JSON.parse(localStorage.getItem('suno-dock') || 'null'); } catch (e) { data = null; }
 if (!data) return;
-data.order.forEach(w => {
+(data.order || []).forEach(w => {
 const isl = dock.querySelector('[data-widget="' + w + '"]');
-if (isl) dock.insertBefore(isl, editBtn.parentNode === dock ? editBtn : null);
+if (isl) dock.appendChild(isl);
 });
 (data.hidden || []).forEach(w => {
 const isl = dock.querySelector('[data-widget="' + w + '"]');
 if (isl) isl.style.display = 'none';
 });
+if (Array.isArray(data.appPins)) appPins = data.appPins.filter(t => dockAppIcons.some(n => n.title === t));
+if (Array.isArray(data.quickPins)) quickPins = data.quickPins.filter(t => quickIcons.some(n => n.title === t));
 }
-editBtn.addEventListener('click', () => {
-editOn = !editOn;
-dock.classList.toggle('editing', editOn);
-editBtn.classList.toggle('on', editOn);
-if (!editOn) { addMenu.classList.remove('open'); saveDock(); }
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && editOn) editBtn.click(); });
 
-/* drag & drop: pointer na wyspie (tylko w trybie aranżacji) */
+/* podział ikon: przypięte | pozostałe (sekcje z pionowymi kreskami) */
+function renderPins() {
+dockAppIcons.forEach(n => {
+(appPins.includes(n.title) ? dockPinned : dockRest).appendChild(n);
+});
+secRest.style.display = (dockPinned.children.length && dockRest.children.length) ? '' : 'none';
+renderPinChips();
+}
+function renderQuick() {
+quickIcons.forEach(n => { n.style.display = quickPins.includes(n.title) ? '' : 'none'; });
+renderQuickChips();
+}
+function toggleAppPin(title) {
+appPins = appPins.includes(title) ? appPins.filter(x => x !== title) : [...appPins, title];
+renderPins(); saveDock();
+}
+function toggleQuickPin(title) {
+quickPins = quickPins.includes(title) ? quickPins.filter(x => x !== title) : [...quickPins, title];
+renderQuick(); saveDock();
+}
+dockAppIcons.forEach(n => n.addEventListener('contextmenu', e => {
+e.preventDefault();
+toggleAppPin(n.title);
+}));
+quickIcons.forEach(n => {
+n.addEventListener('contextmenu', e => { e.preventDefault(); toggleQuickPin(n.title); });
+n.addEventListener('click', () => {
+raise('win-filer');
+const nav = [...document.querySelectorAll('#win-filer .fnav')].find(b => b.textContent.trim() === n.dataset.nav);
+if (nav) nav.click();
+});
+});
+
+/* chips w Ustawieniach: klik przypina/odepina; menu kontekstowe w doku */
+const CHIPCOLORS = { 'ic-blue':'#2a6be0', 'ic-indigo':'#4b5ae0', 'ic-slate':'#525d6e', 'ic-violet':'#8b53e8', 'ic-coral':'#f05340', 'ic-amber':'#f28c26', 'ic-teal':'#12a394', 'ic-green':'#28a35c' };
+function chipColor(n) {
+const c = [...n.classList].find(cl => CHIPCOLORS[cl]);
+return c ? CHIPCOLORS[c] : '#e5484d';
+}
+function makeChip(label, color, sel, onToggle) {
+const b = document.createElement('button');
+b.type = 'button';
+b.className = 'pchip' + (sel ? ' sel' : '');
+b.style.setProperty('--chipc', color);
+b.innerHTML = '<span class="cdot"></span>' + label;
+b.addEventListener('click', onToggle);
+return b;
+}
+function renderPinChips() {
+const box = $('dockpins');
+if (!box) return;
+const frag = document.createDocumentFragment();
+dockAppIcons.forEach(n => frag.appendChild(makeChip(n.title, chipColor(n), appPins.includes(n.title), () => toggleAppPin(n.title))));
+box.replaceChildren(frag);
+}
+function renderQuickChips() {
+const box = $('quickpins');
+if (!box) return;
+const frag = document.createDocumentFragment();
+quickIcons.forEach(n => frag.appendChild(makeChip(n.title, chipColor(n), quickPins.includes(n.title), () => toggleQuickPin(n.title))));
+box.replaceChildren(frag);
+}
+
+/* tryb aranżacji: włączany tylko z Ustawień; drag&drop wysp */
+function setEditing(on) {
+editOn = on;
+dock.classList.toggle('editing', on);
+const t = $('arrangearr');
+if (t) t.classList.toggle('on', on);
+if (!on) saveDock();
+}
+$('arrangearr').addEventListener('click', () => setEditing(!editOn));
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && editOn) setEditing(false); });
+
 dock.querySelectorAll('.island').forEach(isl => {
 isl.addEventListener('pointerdown', e => {
 if (!editOn || e.target.closest('.pop')) return;
@@ -1645,38 +1748,35 @@ if (!dragEl) return;
 const sibs = [...dock.querySelectorAll('.island')].filter(s => s !== dragEl && s.style.display !== 'none');
 const target = sibs.find(s => e.clientX < s.getBoundingClientRect().left + s.offsetWidth / 2);
 if (target) dock.insertBefore(dragEl, target);
-else dock.insertBefore(dragEl, editBtn);
+else dock.appendChild(dragEl);
 });
 ['pointerup', 'pointercancel'].forEach(ev => isl.addEventListener(ev, () => {
 if (dragEl) { dragEl.classList.remove('dragging'); dragEl = null; saveDock(); }
 }));
-/* ✕ — ukryj wyspę */
+/* ✕ — ukryj wyspę (tylko w trybie aranżacji) */
 const rm = document.createElement('button');
 rm.className = 'rm'; rm.textContent = '✕'; rm.title = 'Ukryj wyspę';
-rm.addEventListener('click', e => { e.stopPropagation(); isl.style.display = 'none'; saveDock(); });
+rm.addEventListener('click', e => { e.stopPropagation(); isl.style.display = 'none'; saveDock(); syncIslandTgls(); });
 isl.appendChild(rm);
 });
 
-/* ⊕ — menu przywracania ukrytych wysp */
-addBtn.addEventListener('click', e => {
-e.stopPropagation();
-const r = addBtn.getBoundingClientRect();
-addMenu.style.left = Math.min(r.left, window.innerWidth - 200) + 'px';
-addMenu.style.bottom = (window.innerHeight - r.top + 10) + 'px';
-addMenu.style.top = 'auto';
-addMenu.classList.toggle('open');
-addMenu.querySelectorAll('button').forEach(b => {
-const isl = dock.querySelector('[data-widget="' + b.dataset.add + '"]');
-b.disabled = !isl || isl.style.display !== 'none';
-});
-});
-addMenu.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
-const isl = dock.querySelector('[data-widget="' + b.dataset.add + '"]');
-if (isl) { isl.style.display = ''; saveDock(); }
-addMenu.classList.remove('open');
+/* widoczność wysp — przełączniki w Ustawieniach */
+document.querySelectorAll('.tgl[data-isl]').forEach(t => t.addEventListener('click', () => {
+const isl = $('isl-' + t.dataset.isl);
+if (!isl) return;
+isl.style.display = t.classList.toggle('on') ? '' : 'none';
+saveDock();
 }));
-document.addEventListener('click', e => { if (!addMenu.contains(e.target) && e.target !== addBtn) addMenu.classList.remove('open'); });
+function syncIslandTgls() {
+document.querySelectorAll('.tgl[data-isl]').forEach(t => {
+const isl = $('isl-' + t.dataset.isl);
+t.classList.toggle('on', !!isl && isl.style.display !== 'none');
+});
+}
 restoreDock();
+renderPins();
+renderQuick();
+syncIslandTgls();
 
 /* ============ APLIKACJA: CZAT (rozmowy + odpowiedź) ============ */
 const CONVS = [
@@ -1912,7 +2012,8 @@ if (!p) return;
 if (p.theme === 'light' || p.theme === 'dark') { sysFollow = false; applyTheme(p.theme); }
 if (p.accent) { const b = [...adots].find(a => a.dataset.color === p.accent); if (b) applyAccent(b); }
 if (p.bg) { const b = [...bgths].find(x => x.dataset.bg === p.bg); if (b) b.click(); }
-if (p.effect) { const b = [...fxBtns].find(x => x.dataset.fx === p.effect); if (b) b.click(); }
+if (p.glass) { glassRange.value = Math.min(85, Math.max(12, p.glass)); applyGlass(); }
+if (p.frost === false) { frostTgl.classList.remove('on'); applyGlass(); }
 if (p.nl) { const nb = document.querySelector('.qtog[data-t="nl"]'); if (nb) nb.classList.add('on'); }
 $('nlwash').classList.toggle('on', !!p.nl);
 if (p.tint === false) { $('tinttgl').classList.remove('on'); root.classList.remove('tint'); }
