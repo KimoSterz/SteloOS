@@ -227,7 +227,6 @@ box-shadow: 0 8px 28px color-mix(in srgb, var(--accent) 13%, transparent), 0 2px
 .doc i { width:26px; height:2.2px; border-radius:2px; background:#c3c3ca; }
 .doc i:nth-child(3) { width:18px; }
 .doc i:nth-child(4) { width:23px; }
-.doc.movie::after { content:""; position:absolute; right:7px; bottom:6px; width:0; height:0; border-left:9px solid #fff; border-top:6px solid transparent; border-bottom:6px solid transparent; filter:drop-shadow(0 1px 2px rgba(0,0,0,.4)); }
 .doc.stage .dotsrow { display:flex; gap:2px; margin-top:2px; }
 .doc.stage .dotsrow i { width:5px; height:5px; border-radius:2px; background:#f2542d; }
 .doc.stage .dotsrow i:nth-child(2){ background:#f2c14e; }
@@ -475,11 +474,11 @@ transition:opacity .2s var(--ease), transform .2s var(--ease); z-index:55;
 .qs-slider { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
 .qs-slider .sic { width:26px; height:26px; display:grid; place-items:center; color:var(--ink-2); flex-shrink:0; }
 .qs-slider .sic svg { width:16px; height:16px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; }
-.qs-slider input[type="raneg"] { flex:1; }
+.qs-slider input[type="range"] { flex:1; }
 .qs-slider input[type="range"] { flex:1; }
 .qs-slider .sval { width:34px; text-align:right; font-size:12px; font-weight:700; }
 .qs-slider .sauto { width:34px; text-align:right; font-size:10.5px; font-weight:700; color:var(--accent); }
-input[type="raneg"], input[type="range"] { height:22px; appearance:none; -webkit-appearance:none; background:transparent; cursor:pointer; }
+input[type="range"] { height:22px; appearance:none; -webkit-appearance:none; background:transparent; cursor:pointer; }
 input[type="range"]::-webkit-slider-runnable-track { height:8px; border-radius:999px; background:linear-gradient(90deg, var(--track-ac,#4a4a52) var(--fill,50%), var(--btn) var(--fill,50%)); border:1px solid var(--border); }
 input[type="range"]::-moz-range-track { height:8px; border-radius:999px; background:linear-gradient(90deg, var(--track-ac,#4a4a52) var(--fill,50%), var(--btn) var(--fill,50%)); border:1px solid var(--border); }
 input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:0; height:0; }
@@ -586,6 +585,163 @@ poprzedniego stanu z doku — miniatury w wyspie okien).
 .rz.se { bottom:-3px; right:-3px; width:14px; height:14px; cursor:nwse-resize; }
 .rz.sw { bottom:-3px; left:-3px; width:14px; height:14px; cursor:nesw-resize; }
 
+/* ================================================================
+POLISH: scrollbary, zaznaczenie, fokus klawiatury, okno aktywne,
+animacja otwarcia okna, pulpit z paska górnego.
+================================================================ */
+::-webkit-scrollbar { width:9px; height:9px; }
+::-webkit-scrollbar-thumb { background:color-mix(in srgb, var(--ink-3) 38%, transparent); border-radius:8px; border:2px solid transparent; background-clip:padding-box; }
+::-webkit-scrollbar-thumb:hover { background:color-mix(in srgb, var(--ink-3) 60%, transparent); background-clip:padding-box; }
+::-webkit-scrollbar-track { background:transparent; }
+* { scrollbar-width:thin; scrollbar-color:color-mix(in srgb, var(--ink-3) 45%, transparent) transparent; }
+::selection { background:color-mix(in srgb, var(--accent) 40%, transparent); color:var(--ink); }
+:focus-visible { outline:2px solid color-mix(in srgb, var(--accent) 75%, transparent); outline-offset:2px; }
+.window:not(.hidden) { animation:win-in .34s var(--ease); }
+@keyframes win-in { from { opacity:0; transform:scale(.965) translateY(12px); } to { opacity:1; transform:scale(1) translateY(0); } }
+.window:not(.focused):not(.hidden) { box-shadow:var(--sh-2), 0 6px 20px rgba(0,0,0,.3); }
+html.tint .window:not(.focused):not(.hidden) { box-shadow:var(--sh-2), 0 6px 20px rgba(0,0,0,.3); }
+.window:not(.focused):not(.hidden) .tb-title { color:var(--ink-2); }
+.toppill { transition:filter .2s; }
+.toppill:hover { filter:brightness(1.12); }
+
+/* Kropka „uruchomiona" pod ikoną w doku + ✕ na miniaturze okna */
+.dot-run { position:absolute; bottom:-7px; left:50%; transform:translateX(-50%); width:4.5px; height:4.5px; border-radius:50%; background:var(--ink-2); opacity:0; transition:opacity .25s; box-shadow:0 1px 2px rgba(0,0,0,.35); }
+.dot-run.on { opacity:.9; }
+.wthumb .tclose { position:absolute; top:3px; right:3px; width:14px; height:14px; border:none; border-radius:50%; background:rgba(0,0,0,.55); color:#fff; font-size:8px; line-height:1; display:grid; place-items:center; cursor:pointer; opacity:0; transition:opacity .15s, background .15s; padding:0; }
+.wthumb:hover .tclose { opacity:1; }
+.wthumb .tclose:hover { background:#e5484d; }
+
+/* Miniatura wideo w Filerze: trójkąt „play" na gradientowym kafelku */
+.thumb .playico { position:absolute; right:7px; bottom:6px; width:0; height:0; border-left:9px solid #fff; border-top:6px solid transparent; border-bottom:6px solid transparent; filter:drop-shadow(0 1px 2px rgba(0,0,0,.45)); z-index:2; }
+
+/* ================================================================
+LAUNCHER (All apps — jak w Lumie), EKRAN BLOKADY, TRYB NOCNY
+================================================================ */
+.launch { position:fixed; inset:0; z-index:85; display:none; align-items:center; justify-content:center;
+background:color-mix(in srgb, #0a0a12 42%, transparent);
+backdrop-filter:blur(28px) saturate(1.4); -webkit-backdrop-filter:blur(28px) saturate(1.4); }
+.launch.open { display:flex; animation:fade-in .22s var(--ease); }
+@keyframes fade-in { from { opacity:0; } }
+.lsearch { display:flex; align-items:center; gap:9px; margin:0 auto 26px; padding:10px 16px; border-radius:12px; width:min(400px,86vw); background:var(--btn); border:1px solid var(--border); color:var(--ink-3); }
+.lsearch svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:1.8; flex-shrink:0; }
+.lsearch input { flex:1; min-width:0; border:none; background:transparent; outline:none; color:var(--ink); font-size:14px; font-family:var(--font); }
+.lsearch input::placeholder { color:var(--ink-3); }
+.lgrid { display:grid; grid-template-columns:repeat(4,minmax(96px,1fr)); gap:16px 4px; justify-items:center; }
+.lapp { display:flex; flex-direction:column; align-items:center; gap:9px; padding:12px 6px; border:none; background:transparent; border-radius:14px; cursor:pointer; font-family:var(--font); transition:background .15s; }
+.lapp:hover { background:var(--hover); }
+.lapp .aicon { width:52px; height:52px; border-radius:14px; animation:none; }
+.lapp .aicon svg { width:24px; height:24px; }
+.lapp .aicon:hover { transform:translateY(-3px) scale(1.05); }
+.lapp .ln { font-size:11px; font-weight:600; color:var(--ink-2); text-align:center; line-height:1.25; }
+.lapp:hover .ln { color:var(--ink); }
+
+.lock { position:fixed; inset:0; z-index:96; display:none; flex-direction:column; align-items:center; justify-content:center; gap:6px; text-align:center; cursor:pointer;
+background:color-mix(in srgb, #05050a 55%, transparent);
+backdrop-filter:blur(34px) saturate(1.3); -webkit-backdrop-filter:blur(34px) saturate(1.3); }
+.lock.open { display:flex; animation:fade-in .25s var(--ease); }
+.lock .lk-logo { width:56px; height:56px; border-radius:50%; object-fit:cover; box-shadow:0 6px 20px rgba(0,0,0,.5); margin-bottom:16px; }
+.lock .lk-time { font-size:64px; font-weight:700; letter-spacing:-.01em; color:#fff; font-variant-numeric:tabular-nums; line-height:1; }
+.lock .lk-time small { font-size:18px; font-weight:700; vertical-align:top; margin-left:4px; opacity:.8; }
+.lock .lk-date { font-size:15px; font-weight:600; color:rgba(255,255,255,.8); margin-top:6px; }
+.lock .lk-hint { margin-top:44px; font-size:12px; font-weight:600; color:rgba(255,255,255,.55); }
+
+#nlwash { position:fixed; inset:0; z-index:94; background:#ff9d42; opacity:0; pointer-events:none; mix-blend-mode:multiply; transition:opacity .5s; }
+#nlwash.on { opacity:.16; }
+#powermenu { left:auto; right:16px; top:56px; bottom:auto; }
+
+/* ================================================================
+APLIKACJE: Czat · Notatki · Aparat · Statystyki · Airdrop · Obszary
+================================================================ */
+.appw { left:34%; top:16%; width:min(660px,54vw); height:min(430px,60%); }
+@media (max-width:900px) { .appw { left:4%; top:10%; width:92vw; } }
+.app2 { display:flex; flex:1; min-height:0; }
+
+/* — Czat — */
+#win-chat { left:26%; top:12%; width:min(780px,62vw); height:min(500px,64%); }
+.clist { width:190px; flex-shrink:0; border-right:1px solid var(--border); background:var(--side); overflow-y:auto; padding:8px; display:flex; flex-direction:column; gap:2px; }
+.citem { display:flex; align-items:center; gap:9px; padding:9px 10px; border:none; background:transparent; border-radius:10px; cursor:pointer; text-align:left; font-family:var(--font); transition:background .13s; width:100%; }
+.citem:hover { background:var(--hover); }
+.citem.active { background:var(--btn); }
+.citem .avatar { width:30px; height:30px; font-size:12px; }
+.citem .cinfo { min-width:0; flex:1; }
+.citem .cn { font-size:12px; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.citem .cp { font-size:10px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px; }
+.citem .badge { position:static; width:8px; height:8px; min-width:8px; padding:0; border:none; }
+.cright { flex:1; min-width:0; display:flex; flex-direction:column; background:var(--content); }
+.cheadbar { padding:10px 16px; border-bottom:1px solid var(--border); font-size:12.5px; font-weight:700; display:flex; align-items:center; gap:8px; flex-shrink:0; }
+.cheadbar .online { width:7px; height:7px; border-radius:50%; background:#34c759; }
+.msgs { flex:1; overflow-y:auto; padding:14px 16px; display:flex; flex-direction:column; gap:6px; }
+.bub { max-width:72%; padding:8px 12px; border-radius:14px; font-size:12px; line-height:1.45; background:var(--btn); color:var(--ink); align-self:flex-start; border-bottom-left-radius:5px; white-space:pre-wrap; word-break:break-word; }
+.bub.me { align-self:flex-end; background:var(--accent); color:#fff; border-bottom-left-radius:14px; border-bottom-right-radius:5px; }
+.cinputrow { display:flex; gap:8px; padding:10px 12px; border-top:1px solid var(--border); flex-shrink:0; }
+.cinputrow input { flex:1; min-width:0; border:1px solid var(--border); background:var(--btn); border-radius:10px; outline:none; padding:8px 12px; color:var(--ink); font-size:12px; font-family:var(--font); }
+.cinputrow .csend { width:34px; height:34px; border-radius:10px; border:none; background:var(--accent); color:#fff; cursor:pointer; display:grid; place-items:center; flex-shrink:0; transition:filter .15s, transform .15s; }
+.cinputrow .csend:hover { filter:brightness(1.1); }
+.cinputrow .csend:active { transform:scale(.9); }
+.csend svg { width:14px; height:14px; stroke:#fff; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+/* — Notatki — */
+#win-notes { left:44%; top:14%; width:min(820px,64vw); height:min(520px,66%); }
+#win-notes .nleft { width:210px; flex-shrink:0; border-right:1px solid var(--border); background:var(--side); display:flex; flex-direction:column; min-height:0; }
+.nnew { margin:8px; height:30px; border:1px solid var(--border-strong,var(--border)); border-radius:9px; background:var(--btn); color:var(--ink); font-size:11.5px; font-weight:600; cursor:pointer; font-family:var(--font); transition:background .15s; flex-shrink:0; }
+.nnew:hover { background:var(--hover); }
+.nlist { flex:1; overflow-y:auto; padding:0 6px 8px; display:flex; flex-direction:column; gap:2px; }
+.nitem { text-align:left; border:none; background:transparent; padding:8px 10px; border-radius:9px; cursor:pointer; font-family:var(--font); transition:background .13s; }
+.nitem:hover { background:var(--hover); }
+.nitem.active { background:var(--btn); }
+.nitem .nt { font-size:12px; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.nitem .np { font-size:10px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:2px; }
+.nedit { flex:1; min-width:0; border:none; background:var(--content); color:var(--ink); padding:16px 20px; resize:none; outline:none; font-family:var(--font); font-size:13px; line-height:1.65; }
+
+/* — Aparat — */
+#win-cam { left:16%; top:16%; width:min(560px,46vw); height:min(430px,58%); }
+.app-cam { position:relative; flex:1; min-height:0; background:#0a0a0e; overflow:hidden; }
+#camvideo { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.camfallback { display:none; position:absolute; inset:0; place-items:center; align-content:center; text-align:center; color:var(--ink-2); font-size:12.5px; line-height:1.6; padding:24px; }
+.camflash { position:absolute; inset:0; background:#fff; opacity:0; pointer-events:none; transition:opacity .22s; }
+.cambar { position:absolute; bottom:14px; left:0; right:0; display:flex; align-items:center; justify-content:center; gap:14px; }
+.shutter { width:52px; height:52px; border-radius:50%; background:#fff; border:4px solid rgba(255,255,255,.4); cursor:pointer; box-shadow:0 4px 14px rgba(0,0,0,.45); transition:transform .15s; padding:0; }
+.shutter:hover { transform:scale(1.06); }
+.shutter:active { transform:scale(.9); }
+.camcount { position:absolute; right:16px; bottom:12px; font-size:11px; font-weight:600; color:rgba(255,255,255,.75); background:rgba(0,0,0,.4); padding:4px 10px; border-radius:999px; }
+
+/* — Statystyki — */
+#win-stats { left:40%; top:22%; width:min(520px,44vw); height:min(430px,58%); }
+.app-stats { flex:1; min-height:0; overflow-y:auto; background:var(--content); padding:16px; display:flex; flex-direction:column; gap:14px; }
+.statrow { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.statcard { border:1px solid var(--border); border-radius:12px; padding:12px 14px; background:var(--win); }
+.statcard .sl { font-size:10.5px; font-weight:700; color:var(--ink-3); }
+.statcard .sv { font-size:21px; font-weight:700; margin-top:4px; font-variant-numeric:tabular-nums; }
+.statcard .ss { font-size:10px; color:var(--ink-3); margin-top:3px; }
+.sech2 { font-size:11px; font-weight:700; color:var(--ink-3); }
+.chart { display:flex; align-items:flex-end; gap:4px; height:110px; min-height:90px; flex:1; border-bottom:1px solid var(--border); padding-bottom:2px; }
+.chart i { flex:1; background:linear-gradient(180deg, var(--accent), color-mix(in srgb, var(--accent) 55%, transparent)); border-radius:4px 4px 0 0; opacity:.9; transition:height .6s var(--ease); min-height:4px; }
+
+/* — Airdrop — */
+#win-airdrop { left:30%; top:24%; width:min(500px,46vw); height:min(360px,54%); }
+.app-air { flex:1; min-height:0; overflow-y:auto; background:var(--content); padding:14px; display:flex; flex-direction:column; gap:8px; }
+.airhead { font-size:12px; color:var(--ink-2); padding:2px 2px 6px; line-height:1.5; }
+.adev { display:flex; align-items:center; gap:12px; padding:11px 12px; border:1px solid var(--border); border-radius:12px; background:var(--win); cursor:pointer; transition:border-color .2s; }
+.adev:hover { border-color:var(--border-strong); }
+.adev .avatar { width:32px; height:32px; font-size:13px; }
+.adev .dni { flex:1; min-width:0; }
+.adev .dn { font-size:12.5px; font-weight:600; }
+.adev .dbuf { height:5px; border-radius:4px; background:var(--btn); overflow:hidden; margin-top:6px; }
+.adev .dbuf i { display:block; height:100%; width:0%; background:var(--accent); }
+.adev .dst { font-size:10.5px; color:var(--ink-3); min-width:84px; text-align:right; }
+
+/* — Obszary robocze — */
+#win-work { left:36%; top:20%; width:min(560px,50vw); height:min(360px,52%); }
+.app-work { flex:1; min-height:0; overflow-y:auto; background:var(--content); padding:16px; display:grid; grid-template-columns:repeat(2,1fr); gap:12px; align-content:start; }
+.wcard { border:2px solid var(--border); border-radius:12px; padding:8px; cursor:pointer; background:var(--win); transition:border-color .2s, transform .2s var(--ease); }
+.wcard:hover { transform:translateY(-2px); }
+.wcard.sel { border-color:var(--accent); }
+.wshot { height:84px; border-radius:8px; position:relative; overflow:hidden; }
+.wshot::after { content:""; position:absolute; left:10px; top:12px; width:44%; height:34%; border-radius:4px; background:rgba(255,255,255,.85); box-shadow:8px 10px 0 -2px rgba(255,255,255,.55); }
+html[data-theme="dark"] .wshot::after { background:rgba(255,255,255,.18); box-shadow:8px 10px 0 -2px rgba(255,255,255,.1); }
+.wcard .cvlab { font-size:11px; font-weight:600; color:var(--ink-2); padding:6px 2px 2px; display:flex; justify-content:space-between; }
+.wcard .cvlab .cnt { color:var(--ink-3); }
+
 /* Logo SunoOS (zaćmienie Słońca) w wyspie aplikacji */
 .syslogo { background:#000; overflow:hidden; }
 html[data-theme="light"] .syslogo { background:#000; }
@@ -599,7 +755,7 @@ html[data-theme="light"] .syslogo { background:#000; }
 <div class="wallpaper"></div>
 <div id="dim"></div>
 
-<div class="toppill" title="Grupa okien">
+<div class="toppill" title="Pokaż pulpit">
 <span class="dots"><i></i><i></i><i></i></span>
 <span class="badge" id="wincount">3</span>
 </div>
@@ -671,13 +827,13 @@ Filer
 <div class="ftoolbar glass">
 <button class="tool" aria-label="Wstecz">‹</button>
 <button class="tool" aria-label="Dalej" style="opacity:.45">›</button>
-<label class="fsearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.6-4.6"/></svg><input type="text" id="fsearch" placeholder="Search Launch" /></label>
+<label class="fsearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.6-4.6"/></svg><input type="text" id="fsearch" placeholder="Szukaj w Launch" /></label>
 <div class="vseg">
 <button class="tool active" data-view="grid" title="Siatka"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.4"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.4"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.4"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.4"/></svg></button>
 <button class="tool" data-view="list" title="Lista"><svg viewBox="0 0 24 24"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg></button>
 </div>
 <button class="tool" title="Informacje" style="border-radius:50%;padding:0;width:30px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 7.8h.01"/></svg></button>
-<button class="tool newfolder" id="newfolder">＋ New folder</button>
+<button class="tool newfolder" id="newfolder">＋ Nowy folder</button>
 </div>
 </div>
 </div>
@@ -774,7 +930,7 @@ Settings
 <div class="ftoolbar glass">
 <button class="tool" aria-label="Wstecz">‹</button>
 <button class="tool" style="opacity:.45" aria-label="Dalej">›</button>
-<label class="fsearch" style="width:190px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.6-4.6"/></svg><input type="text" id="setsearch" placeholder="Search settings" /></label>
+<label class="fsearch" style="width:190px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.6-4.6"/></svg><input type="text" id="setsearch" placeholder="Szukaj w ustawieniach" /></label>
 <button class="tool" title="Informacje" style="border-radius:50%;padding:0;width:30px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 7.8h.01"/></svg></button>
 </div>
 </div>
@@ -789,24 +945,20 @@ Settings
 </div>
 <span class="divider"></span>
 <div class="aicon ic-blue" data-open="win-filer" title="Filer"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h4l2 2.5h7A1.5 1.5 0 0 1 20 9v8.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><path d="M4 10.5h16" stroke="rgba(255,255,255,.55)"/></svg><span class="dot-run"></span></div>
-<div class="aicon ic-indigo" title="Airdrop"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l3.5 8.5L12 21l-3.5-9.5z"/><path d="M6 21c2-1 4-1 6 0 2-1 4-1 6 0" stroke="rgba(255,255,255,.6)"/></svg></div>
-<div class="aicon ic-slate" title="Statystyki"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M5 19V10M12 19V5M19 19v-7"/></svg></div>
-<div class="aicon ic-violet" title="Czat"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.6a8.2 8.2 0 0 1-8.2 8.2c-1.5 0-2.9-.4-4.1-1L3 20.5l1.7-4.4A8.2 8.2 0 1 1 21 11.6z"/><path d="M8.5 11.5h7M8.5 14.5h4.5" stroke="rgba(255,255,255,.6)"/></svg><span class="badge">1</span><span class="dot-run"></span></div>
-<div class="aicon ic-coral" title="Aparat"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="7" width="17" height="13" rx="2.5"/><circle cx="12" cy="13.4" r="3.1"/><circle cx="17.4" cy="9.8" r=".8" fill="#fff" stroke="none"/></svg><span class="dot-run"></span></div>
-<div class="aicon ic-amber" title="Notatki"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h9l3.5 3.5v13a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5v-16a.5.5 0 0 1 .5-.5z"/><path d="M9 12h6M9 15.5h4"/></svg></div>
-<div class="aicon ic-teal" title="Dokumenty"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M8 8.5h8M8 12h8M8 15.5h5"/></svg></div>
-<div class="cal-icon" title="Kalendarz"><span class="m" id="calM">LIS</span><span class="d" id="calD">27</span></div>
+<div class="aicon ic-indigo" data-open="win-airdrop" title="Airdrop"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l3.5 8.5L12 21l-3.5-9.5z"/><path d="M6 21c2-1 4-1 6 0 2-1 4-1 6 0" stroke="rgba(255,255,255,.6)"/></svg><span class="dot-run"></span></div>
+<div class="aicon ic-slate" data-open="win-stats" title="Statystyki"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M5 19V10M12 19V5M19 19v-7"/></svg><span class="dot-run"></span></div>
+<div class="aicon ic-violet" data-open="win-chat" title="Czat"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.6a8.2 8.2 0 0 1-8.2 8.2c-1.5 0-2.9-.4-4.1-1L3 20.5l1.7-4.4A8.2 8.2 0 1 1 21 11.6z"/><path d="M8.5 11.5h7M8.5 14.5h4.5" stroke="rgba(255,255,255,.6)"/></svg><span class="badge" id="chatbadge">1</span><span class="dot-run"></span></div>
+<div class="aicon ic-coral" data-open="win-cam" title="Aparat"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="7" width="17" height="13" rx="2.5"/><circle cx="12" cy="13.4" r="3.1"/><circle cx="17.4" cy="9.8" r=".8" fill="#fff" stroke="none"/></svg><span class="dot-run"></span></div>
+<div class="aicon ic-amber" data-open="win-notes" title="Notatki"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h9l3.5 3.5v13a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5v-16a.5.5 0 0 1 .5-.5z"/><path d="M9 12h6M9 15.5h4"/></svg><span class="dot-run"></span></div>
+<div class="aicon ic-teal" data-open="win-filer" title="Dokumenty"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M8 8.5h8M8 12h8M8 15.5h5"/></svg><span class="dot-run"></span></div>
+<div class="cal-icon" title="Kalendarz" id="calicon"><span class="m" id="calM">LIS</span><span class="d" id="calD">27</span></div>
 <div class="aicon ic-slate" data-open="win-settings" title="Ustawienia"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.1"/><path d="M12 2.8v2.7M12 18.5v2.7M2.8 12h2.7M18.5 12h2.7M5.4 5.4l1.9 1.9M16.7 16.7l1.9 1.9M18.6 5.4l-1.9 1.9M7.3 16.7l-1.9 1.9"/></svg><span class="dot-run"></span></div>
-<div class="aicon ic-green" title="Warstwy"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5-8 4.5-8-4.5z"/><path d="M4 12.5l8 4.5 8-4.5" stroke="rgba(255,255,255,.6)"/><path d="M4 16.5l8 4.5 8-4.5" stroke="rgba(255,255,255,.35)"/></svg></div>
+<div class="aicon ic-green" data-open="win-work" title="Obszary robocze"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5-8 4.5-8-4.5z"/><path d="M4 12.5l8 4.5 8-4.5" stroke="rgba(255,255,255,.6)"/><path d="M4 16.5l8 4.5 8-4.5" stroke="rgba(255,255,255,.35)"/></svg><span class="dot-run"></span></div>
 </div>
 
 <div class="island glass" data-widget="windows" id="isl-windows">
-<div class="winthumbs">
-<div class="wthumb" data-open="win-filer" style="--thumb-ac:#e5484d"><div class="bar"></div><div class="lines"><i></i><i></i></div></div>
-<div class="wthumb" data-open="win-filer" style="--thumb-ac:#f2790f"><div class="bar"></div><div class="lines"><i></i><i></i></div></div>
-<div class="wthumb" data-open="win-settings" style="--thumb-ac:#8b53e8"><div class="bar"></div><div class="lines"><i></i><i></i></div></div>
-</div>
-<span class="badge" style="position:static; margin-left:-2px">3</span>
+<div class="winthumbs"></div>
+<span class="badge" style="position:static; margin-left:-2px; display:none">0</span>
 </div>
 
 <div class="island glass statuswrap" data-widget="net" id="isl-net">
@@ -823,7 +975,7 @@ Settings
 <div class="qs-head">
 <span class="dayname" id="qsday">środa</span>
 <span class="daydate" id="qsdate">25 listopada</span>
-<span class="batt"><svg viewBox="0 0 24 24"><rect x="2.5" y="8" width="16" height="8" rx="2.2"/><path d="M21.5 11v2.5"/></svg>74%</span>
+<span class="batt"><svg viewBox="0 0 24 24"><rect x="2.5" y="8" width="16" height="8" rx="2.2"/><path d="M21.5 11v2.5"/></svg><span id="battpct">74%</span></span>
 </div>
 <div class="qs-slider">
 <span class="sic"><svg viewBox="0 0 24 24"><path d="M4 9.5v5h3.5L12 19V5L7.5 9.5z"/><path d="M16 9a4.5 4.5 0 0 1 0 6"/></svg></span>
@@ -914,6 +1066,38 @@ Settings
 <button data-add="clock">Zegar / Kalendarz</button>
 </div>
 
+<div class="addmenu glass" id="powermenu">
+<button data-act="lock">Zablokuj ekran</button>
+<button data-act="sleep">Uśpij</button>
+<button data-act="restart">Uruchom ponownie</button>
+</div>
+
+<!-- ============ LAUNCHER (All apps) ============ -->
+<div class="launch" id="launch">
+<label class="lsearch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.6-4.6"/></svg><input type="text" id="launchsearch" placeholder="Szukaj aplikacji" /></label>
+<div class="lgrid" id="lgrid">
+<button class="lapp" data-open="win-filer" data-name="Filer"><span class="aicon ic-blue"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h4l2 2.5h7A1.5 1.5 0 0 1 20 9v8.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><path d="M4 10.5h16" stroke="rgba(255,255,255,.55)"/></svg></span><span class="ln">Filer</span></button>
+<button class="lapp" data-open="win-filer" data-name="Dokumenty"><span class="aicon ic-teal"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M8 8.5h8M8 12h8M8 15.5h5"/></svg></span><span class="ln">Dokumenty</span></button>
+<button class="lapp" data-open="win-chat" data-name="Czat"><span class="aicon ic-violet"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.6a8.2 8.2 0 0 1-8.2 8.2c-1.5 0-2.9-.4-4.1-1L3 20.5l1.7-4.4A8.2 8.2 0 1 1 21 11.6z"/><path d="M8.5 11.5h7M8.5 14.5h4.5" stroke="rgba(255,255,255,.6)"/></svg></span><span class="ln">Czat</span></button>
+<button class="lapp" data-open="win-notes" data-name="Notatki"><span class="aicon ic-amber"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h9l3.5 3.5v13a.5.5 0 0 1-.5.5H6a.5.5 0 0 1-.5-.5v-16a.5.5 0 0 1 .5-.5z"/><path d="M9 12h6M9 15.5h4"/></svg></span><span class="ln">Notatki</span></button>
+<button class="lapp" data-open="win-cam" data-name="Aparat"><span class="aicon ic-coral"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="7" width="17" height="13" rx="2.5"/><circle cx="12" cy="13.4" r="3.1"/><circle cx="17.4" cy="9.8" r=".8" fill="#fff" stroke="none"/></svg></span><span class="ln">Aparat</span></button>
+<button class="lapp" data-open="win-stats" data-name="Statystyki"><span class="aicon ic-slate"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M5 19V10M12 19V5M19 19v-7"/></svg></span><span class="ln">Statystyki</span></button>
+<button class="lapp" data-open="win-airdrop" data-name="Airdrop"><span class="aicon ic-indigo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l3.5 8.5L12 21l-3.5-9.5z"/><path d="M6 21c2-1 4-1 6 0 2-1 4-1 6 0" stroke="rgba(255,255,255,.6)"/></svg></span><span class="ln">Airdrop</span></button>
+<button class="lapp" data-open="win-work" data-name="Obszary robocze"><span class="aicon ic-green"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 4.5-8 4.5-8-4.5z"/><path d="M4 12.5l8 4.5 8-4.5" stroke="rgba(255,255,255,.6)"/><path d="M4 16.5l8 4.5 8-4.5" stroke="rgba(255,255,255,.35)"/></svg></span><span class="ln">Obszary robocze</span></button>
+<button class="lapp" data-cal="1" data-name="Kalendarz"><span class="cal-icon" style="width:52px;height:52px;border-radius:14px"><span class="m" id="calM2">LIS</span><span class="d" id="calD2">27</span></span><span class="ln">Kalendarz</span></button>
+<button class="lapp" data-open="win-settings" data-name="Ustawienia"><span class="aicon ic-slate"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.1"/><path d="M12 2.8v2.7M12 18.5v2.7M2.8 12h2.7M18.5 12h2.7M5.4 5.4l1.9 1.9M16.7 16.7l1.9 1.9M18.6 5.4l-1.9 1.9M7.3 16.7l-1.9 1.9"/></svg></span><span class="ln">Ustawienia</span></button>
+</div>
+</div>
+
+<!-- ============ TRYB NOCNY + EKRAN BLOKADY ============ -->
+<div id="nlwash" aria-hidden="true"></div>
+<div class="lock" id="lock">
+<img class="lk-logo" src="assets/suno-logo.jpg" alt="Logo SunoOS" draggable="false" />
+<div class="lk-time" id="lktime">--:--</div>
+<div class="lk-date" id="lkdate">--</div>
+<div class="lk-hint">Kliknij, aby odblokować</div>
+</div>
+
 <script>
 /* ================================================================
 JS — jeden stan, kilka kontrolerów. Referencje cache'owane raz,
@@ -927,6 +1111,28 @@ const $ = (id) => document.getElementById(id);
 
 /* ============ OKNA: podnoszenie, zamykanie, otwieranie z doku ============ */
 const wins = { 'win-filer': $('win-filer'), 'win-settings': $('win-settings') };
+
+/* ============ APLIKACJE DOKU: realne okna budowane z rejestr ============ */
+const WINBTNS = '<div class="winbtns"><button class="winbtn min" aria-label="Minimalizuj"><span class="wic"><svg viewBox="0 0 24 24"><path d="M6.5 10.5l5.5 5.5 5.5-5.5"/></svg></span></button><button class="winbtn max" aria-label="Maksymalizuj"><span class="wic"><svg viewBox="0 0 24 24"><path d="M14.5 5H19v4.5M19 5l-6 6M9.5 19H5v-4.5M5 19l6-6"/></svg></span></button><button class="winbtn close" aria-label="Zamknij"><span class="wic"><svg viewBox="0 0 24 24"><path d="M7.5 7.5l9 9M16.5 7.5l-9 9"/></svg></span></button></div>';
+const APPS = [
+{ id:'win-chat', title:'Czat', ac:'#8b53e8', body:'<div class="app2"><div class="clist" id="clist"></div><div class="cright"><div class="cheadbar"><span class="online"></span><span id="cheadname">—</span></div><div class="msgs" id="msgs"></div><div class="cinputrow"><input type="text" id="cinput" placeholder="Napisz wiadomość…" /><button class="csend" id="csend" aria-label="Wyślij"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></div></div></div>' },
+{ id:'win-notes', title:'Notatki', ac:'#f28c26', body:'<div class="app2"><div class="nleft"><button class="nnew" id="notenew">＋ Nowa notatka</button><div class="nlist" id="noteslist"></div></div><textarea class="nedit" id="noteedit" placeholder="Zacznij pisać…" spellcheck="false"></textarea></div>' },
+{ id:'win-cam', title:'Aparat', ac:'#f05340', body:'<div class="app-cam"><video id="camvideo" autoplay playsinline muted></video><div class="camfallback" id="camfallback">Brak dostępu do kamery albo przeglądarka go blokuje.<br>Zezwól na dostęp i otwórz aplikację ponownie.</div><div class="camflash" id="camflash"></div><div class="cambar"><button class="shutter" id="shutter" aria-label="Zrób zdjęcie"></button></div><span class="camcount" id="camcount">Zdjęcia: 0</span></div>' },
+{ id:'win-stats', title:'Statystyki', ac:'#525d6e', body:'<div class="app-stats"><div class="statrow"><div class="statcard"><div class="sl">Procesor</div><div class="sv" id="stcpu">34%</div><div class="ss">8 rdzeni</div></div><div class="statcard"><div class="sl">Pamięć</div><div class="sv" id="stram">9,2 GB</div><div class="ss">z 16 GB</div></div><div class="statcard"><div class="sl">Sieć</div><div class="sv" id="stnet">4,1 MB/s</div><div class="ss">5G · Studio North</div></div></div><div class="sech2">Procesor — ostatnie 20 s</div><div class="chart" id="chart"></div></div>' },
+{ id:'win-airdrop', title:'Airdrop', ac:'#4b5ae0', body:'<div class="app-air"><div class="airhead">Udostępnij przez Airdrop — wybierz urządzenie dla <b>launch-deck.stage</b> (18,4 MB)</div><div id="adevs"></div></div>' },
+{ id:'win-work', title:'Obszary robocze', ac:'#28a35c', body:'<div class="app-work" id="workgrid"></div>' },
+];
+APPS.forEach(a => {
+const w = document.createElement('div');
+w.className = 'window appw glass hidden';
+w.id = a.id;
+w.innerHTML = '<div class="titlebar"><span class="tb-title"><span class="appic" style="background:' + a.ac + '">' +
+'<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg></span>' +
+a.title + '</span>' + WINBTNS + '</div>' + a.body;
+document.body.appendChild(w);
+wins[a.id] = w;
+});
+const APPMETA = { 'win-filer':{ac:'#2a6be0'}, 'win-settings':{ac:'#8b53e8'}, 'win-chat':{ac:'#8b53e8'}, 'win-notes':{ac:'#f28c26'}, 'win-cam':{ac:'#f05340'}, 'win-stats':{ac:'#525d6e'}, 'win-airdrop':{ac:'#4b5ae0'}, 'win-work':{ac:'#28a35c'} };
 let zTop = 100;
 function raise(id) {
 const w = wins[id];
@@ -934,6 +1140,14 @@ if (!w) return;
 w.classList.remove('hidden');
 zTop += 1;
 w.style.zIndex = zTop;
+setFocused(w);
+if (id === 'win-chat') { const b = $('chatbadge'); if (b) b.style.display = 'none'; }
+if (id === 'win-cam') startCam();
+updateThumbs();
+}
+function setFocused(w) {
+document.querySelectorAll('.window.focused').forEach(x => x.classList.remove('focused'));
+w.classList.add('focused');
 }
 Object.values(wins).forEach(w => w.addEventListener('pointerdown', () => {
 if (+w.style.zIndex !== zTop) raise(w.id);
@@ -941,24 +1155,60 @@ if (+w.style.zIndex !== zTop) raise(w.id);
 document.querySelectorAll('.winbtn.close').forEach(b => b.addEventListener('click', () => {
 b.closest('.window').classList.add('hidden');
 updateWinCount();
+updateThumbs();
 }));
 /* min: minimalizacja okna — powrót przez miniaturę w wyspie okien doku */
 document.querySelectorAll('.winbtn.min').forEach(b => b.addEventListener('click', () => {
 b.closest('.window').classList.add('hidden');
 updateWinCount();
+updateThumbs();
 }));
 function updateWinCount() {
 const n = document.querySelectorAll('.window:not(.hidden)').length;
 const pill = $('wincount');
 if (pill) pill.textContent = n;
 const isl = document.querySelector('#isl-windows > .badge');
-if (isl) isl.textContent = n;
+if (isl) { isl.textContent = n; isl.style.display = n ? '' : 'none'; }
+}
+/* Miniatury otwartych okien (wyspa doku) — zawsze zgodne ze stanem */
+const wthumbsBox = document.querySelector('#isl-windows .winthumbs');
+function updateThumbs() {
+const live = Object.keys(wins).filter(id => !wins[id].classList.contains('hidden'));
+wthumbsBox.querySelectorAll('.wthumb').forEach(t => t.remove());
+live.forEach(id => {
+const t = document.createElement('div');
+t.className = 'wthumb';
+t.dataset.open = id;
+t.style.setProperty('--thumb-ac', (APPMETA[id] || {}).ac || '#525d6e');
+t.innerHTML = '<div class="bar"></div><div class="lines"><i></i><i></i></div><button class="tclose" title="Zamknij">✕</button>';
+t.addEventListener('click', () => raise(id));
+t.querySelector('.tclose').addEventListener('click', e => {
+e.stopPropagation();
+wins[id].classList.add('hidden');
+updateWinCount(); updateThumbs();
+});
+wthumbsBox.appendChild(t);
+});
+updateRunDots();
+const vis = live.map(id => wins[id]);
+if (vis.length && !vis.some(w => w.classList.contains('focused'))) {
+const top = vis.reduce((a, b) => (+a.style.zIndex || 0) >= (+b.style.zIndex || 0) ? a : b);
+top.classList.add('focused');
+}
+}
+/* Kropki „uruchomiona aplikacja" pod ikonami w doku/launcheratorze */
+function updateRunDots() {
+document.querySelectorAll('[data-open]').forEach(el => {
+const dot = el.querySelector('.dot-run');
+const w = wins[el.dataset.open];
+if (dot && w) dot.classList.toggle('on', !w.classList.contains('hidden'));
+});
 }
 /* max: przełączanie zmaksymalizowanego/normalnego rozmiaru okna */
 document.querySelectorAll('.winbtn.max').forEach(b => b.addEventListener('click', () => {
 b.closest('.window').classList.toggle('maximized');
 }));
-document.querySelectorAll('[data-open]').forEach(el => el.addEventListener('click', () => { raise(el.dataset.open); updateWinCount(); }));
+document.querySelectorAll('[data-open]').forEach(el => el.addEventListener('click', () => { raise(el.dataset.open); updateWinCount(); $('launch').classList.remove('open'); }));
 
 /* ============ PRZESUWANIE I ZMIANA ROZMIARU OKIEN ============ */
 const WIN_MINW = 520, WIN_MINH = 320;
@@ -1029,12 +1279,23 @@ hd.addEventListener('pointercancel', endMode);
 });
 });
 updateWinCount();
+updateThumbs();
+$('win-filer').classList.add('focused');
+
+/* ============ POKAŻ PULPIT (klik w pasek górny) ============ */
+$('wincount').closest('.toppill').addEventListener('click', () => {
+const anyVisible = Object.values(wins).some(w => !w.classList.contains('hidden'));
+Object.values(wins).forEach(w => w.classList.toggle('hidden', anyVisible));
+updateWinCount();
+updateThumbs();
+});
 
 /* ============ EFEKT SZKŁA + MOTYW (skrót i karty w Settings) ============ */
 const fxBtns = document.querySelectorAll('.fx-btn');
 fxBtns.forEach(b => b.addEventListener('click', () => {
 fxBtns.forEach(x => x.classList.toggle('active', x === b));
 root.dataset.effect = b.dataset.fx;
+savePrefs();
 }));
 
 const themeBtns = document.querySelectorAll('.theme-btn');
@@ -1048,10 +1309,27 @@ subTheme.textContent = t === 'dark' ? 'Dark' : 'Light';
 $('qsdark').classList.toggle('on', t === 'dark'); /* kafelek Dark Style w QS */
 if (!silent) return;
 }
-themeBtns.forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.theme)));
-themeCards.forEach(c => c.addEventListener('click', () => applyTheme(c.dataset.theme)));
-$('qsdark').addEventListener('click', () => applyTheme(root.dataset.theme === 'dark' ? 'light' : 'dark'));
+themeBtns.forEach(b => b.addEventListener('click', () => { applyTheme(b.dataset.theme); savePrefs(); }));
+themeCards.forEach(c => c.addEventListener('click', () => { applyTheme(c.dataset.theme); savePrefs(); }));
+$('qsdark').addEventListener('click', () => { applyTheme(root.dataset.theme === 'dark' ? 'light' : 'dark'); savePrefs(); });
 applyTheme('dark');
+
+/* ============ TRWAŁOŚĆ USTAWIEŃ (localStorage) ============ */
+function savePrefs() {
+try {
+const acc = [...adots].find(a => a.classList.contains('sel'));
+const nlBtn = document.querySelector('.qtog[data-t="nl"]');
+localStorage.setItem('suno-prefs', JSON.stringify({
+theme: root.dataset.theme,
+accent: acc ? acc.dataset.color : null,
+bg: root.dataset.bg,
+effect: root.dataset.effect,
+tint: root.classList.contains('tint'),
+nl: nlBtn ? nlBtn.classList.contains('on') : false,
+}));
+}
+catch (e) { /* storage niedostępny */ }
+}
 
 /* ============ AKCENTY I TAPETY (Settings) ============ */
 const adots = document.querySelectorAll('.adot');
@@ -1060,6 +1338,7 @@ function applyAccent(btn) {
 root.style.setProperty('--accent', btn.dataset.color);
 adots.forEach(x => x.classList.toggle('sel', x === btn));
 subAccent.textContent = btn.dataset.name;
+savePrefs();
 }
 adots.forEach(b => b.addEventListener('click', () => applyAccent(b)));
 
@@ -1070,6 +1349,7 @@ bgths.forEach(b => b.addEventListener('click', () => {
 root.dataset.bg = b.dataset.bg;
 bgths.forEach(x => x.classList.toggle('sel', x === b));
 subBg.textContent = bgNames[b.dataset.bg] || b.dataset.bg;
+savePrefs();
 }));
 document.querySelector('.bg-th.add').addEventListener('click', function () {
 this.style.transform = 'scale(.92)';
@@ -1079,6 +1359,7 @@ setTimeout(() => this.style.transform = '', 140);
 $('tinttgl').addEventListener('click', () => {
 $('tinttgl').classList.toggle('on');
 root.classList.toggle('tint', $('tinttgl').classList.contains('on'));
+savePrefs();
 });
 
 /* Pasek narzędzi Ustawień: szukajka filtruje pozycje sidebara. */
@@ -1097,7 +1378,7 @@ const FILES = [
 { t:'folder', nm:'Fonts', meta:'6 items', ty:'Folder', dt:'9 kwi 2026' },
 { t:'img', cls:'im-terrace', nm:'hero-writing.webp', meta:'412 KB', ty:'Obraz WebP', dt:'24 lis 2026' },
 { t:'img', cls:'im-field', nm:'field-desk.webp', meta:'388 KB', ty:'Obraz WebP', dt:'22 lis 2026' },
-{ t:'img', cls:'im-ari', nm:'ari-demo.mov', meta:'1.2 GB', movie:false, ty:'Wideo MOV', dt:'21 lis 2026' },
+{ t:'img', cls:'im-ari', nm:'ari-demo.mov', meta:'1.2 GB', movie:true, ty:'Wideo MOV', dt:'21 lis 2026' },
 { t:'doc', tag:'STAGE', dots:true, nm:'launch-deck.stage', meta:'18.4 MB', ty:'Prezentacja', dt:'25 lis 2026' },
 { t:'doc', tag:'GRID', nm:'budget-q4.grid', meta:'96 KB', ty:'Arkusz', dt:'20 lis 2026' },
 { t:'doc', tag:'WRITE', tagColor:'#2a6be0', nm:'press-release.write', meta:'48 KB', ty:'Dokument', dt:'19 lis 2026' },
@@ -1118,6 +1399,7 @@ icon.innerHTML = '<span class="tab"></span><span class="body"></span>';
 } else if (f.t === 'img') {
 icon = document.createElement('div');
 icon.className = 'thumb ' + f.cls;
+if (f.movie) icon.innerHTML = '<span class="playico"></span>';
 } else {
 icon = document.createElement('div');
 icon.className = 'doc';
@@ -1150,7 +1432,8 @@ document.querySelectorAll('.vseg .tool').forEach(x => x.classList.toggle('active
 $('win-filer').dataset.view = b.dataset.view;
 }));
 $('newfolder').addEventListener('click', () => {
-FILES.unshift({ t:'folder', nm:'Nowy folder', meta:'0 items' });
+const d = new Date();
+FILES.unshift({ t:'folder', nm:'Nowy folder', meta:'0 items', ty:'Folder', dt:d.getDate() + ' ' + MON[d.getMonth()] + ' ' + d.getFullYear() });
 renderFiles($('fsearch').value.trim().toLowerCase() || null);
 });
 renderFiles(null);
@@ -1170,7 +1453,27 @@ $('qsday').textContent = DOW[d.getDay()];
 $('qsdate').textContent = d.getDate() + ' ' + MONFULL[d.getMonth()];
 calD.textContent = d.getDate();
 calM.textContent = MON[d.getMonth()].toUpperCase();
+const calD2 = $('calD2'), calM2 = $('calM2');
+if (calD2) calD2.textContent = d.getDate();
+if (calM2) calM2.textContent = MON[d.getMonth()].toUpperCase();
+const lk = $('lktime');
+if (lk) {
+lk.innerHTML = h12 + ':' + pad(d.getMinutes()) + ' <small>' + (d.getHours() < 12 ? 'AM' : 'PM') + '</small>';
+$('lkdate').textContent = DOW[d.getDay()][0].toUpperCase() + DOW[d.getDay()].slice(1) + ', ' + d.getDate() + ' ' + MONFULL[d.getMonth()];
 }
+}
+
+/* Poziom baterii (jeśli przeglądarka udostępnia API) */
+if (navigator.getBattery) {
+navigator.getBattery().then(b => {
+const el = $('battpct');
+if (!el) return;
+const upd = () => el.textContent = Math.round(b.level * 100) + '%';
+b.addEventListener('levelchange', upd);
+upd();
+}).catch(() => {});
+}
+
 tick();
 setInterval(tick, 5000);
 
@@ -1207,7 +1510,6 @@ c.innerHTML = '<span class="dnum">' + (prevDays - i) + '</span><span class="dot"
 frag.appendChild(c);
 }
 const days = new Date(calY, calMo + 1, 0).getDate();
-const daysInEvent = []; /* kropki: dziś + 30. (jeśli miesiąc ma) */
 for (let i = 1; i <= days; i++) {
 const c = document.createElement('div');
 c.className = 'day';
@@ -1240,7 +1542,11 @@ upd();
 }
 bindRange($('vol'), $('vlval'));
 bindRange($('bright'), $('brval'), v => { $('dim').style.opacity = (1 - v / 100) * 0.75; });
-document.querySelectorAll('.qtog[data-t]').forEach(t => t.addEventListener('click', () => t.classList.toggle('on')));
+document.querySelectorAll('.qtog[data-t]').forEach(t => t.addEventListener('click', () => {
+t.classList.toggle('on');
+$('nlwash').classList.toggle('on', document.querySelector('.qtog[data-t="nl"]').classList.contains('on'));
+savePrefs();
+}));
 
 /* ============ BANER POWIADOMIENIA ============ */
 const notif = $('notif');
@@ -1253,6 +1559,7 @@ const v = $('notifreply').value.trim();
 if (!v) return;
 $('notifreply').value = '';
 notif.classList.add('gone');
+pushMsg(0, 'me', v);
 }
 
 /* ================================================================
@@ -1336,6 +1643,247 @@ addMenu.classList.remove('open');
 }));
 document.addEventListener('click', e => { if (!addMenu.contains(e.target) && e.target !== addBtn) addMenu.classList.remove('open'); });
 restoreDock();
+
+/* ============ APLIKACJA: CZAT (rozmowy + odpowiedź) ============ */
+const CONVS = [
+{ n:'Priya Raman', g:'linear-gradient(145deg,#d9a06a,#8a5c93)', m:[
+['w','Hey! Pushed the new shelf build. Want to try it before dinner?'] ] },
+{ n:'Kenji Watanabe', g:'linear-gradient(145deg,#6fb3ff,#2a6be0)', m:[
+['w','Wdepoyowałem nową partię ikon do Depot'],
+['me','Świetnie, obejrzy po launchu'] ] },
+{ n:'Depot Team', g:'linear-gradient(145deg,#69dc8f,#28a35c)', m:[
+['w','Konkurs aplikacji — zgłoszenia do poniedziałku 🎉'] ] },
+];
+let convIdx = 0;
+const clistEl = $('clist'), msgsEl = $('msgs');
+function renderConvs() {
+const frag = document.createDocumentFragment();
+CONVS.forEach((c, i) => {
+const b = document.createElement('button');
+b.className = 'citem' + (i === convIdx ? ' active' : '');
+b.innerHTML = '<span class="avatar" style="background:' + c.g + '">' + c.n[0] + '</span>' +
+'<span class="cinfo"><span class="cn">' + c.n + '</span><span class="cp">' +
+c.m[c.m.length - 1][1] + '</span></span>';
+b.addEventListener('click', () => { convIdx = i; renderConvs(); });
+frag.appendChild(b);
+});
+clistEl.replaceChildren(frag);
+renderThread();
+}
+function renderThread() {
+$('cheadname').textContent = CONVS[convIdx].n;
+const frag = document.createDocumentFragment();
+CONVS[convIdx].m.forEach(([who, text]) => {
+const b = document.createElement('div');
+b.className = 'bub' + (who === 'me' ? ' me' : '');
+b.textContent = text;
+frag.appendChild(b);
+});
+msgsEl.replaceChildren(frag);
+msgsEl.scrollTop = msgsEl.scrollHeight;
+}
+function pushMsg(i, who, text) {
+CONVS[i].m.push([who, text]);
+renderConvs();
+}
+function sendChat() {
+const v = $('cinput').value.trim();
+if (!v) return;
+$('cinput').value = '';
+pushMsg(convIdx, 'me', v);
+setTimeout(() => pushMsg(convIdx, 'w', 'Jasne, daj mi chwilę 🙂'), 900 + Math.random() * 600);
+}
+$('csend').addEventListener('click', sendChat);
+$('cinput').addEventListener('keydown', e => { if (e.key === 'Enter') sendChat(); });
+renderConvs();
+
+/* ============ APLIKACJA: NOTATKI (lista + edytor, localStorage) ============ */
+let NOTES = null;
+try { NOTES = JSON.parse(localStorage.getItem('suno-notes') || 'null'); } catch (e) { NOTES = null; }
+if (!NOTES || !NOTES.length) NOTES = [
+{ t:'Pomysły na SunoOS', b:'• launcher All apps — gotowe\n• obszary robocze 1–4\n• widżet pogody na shelfie' },
+{ t:'Lista zakupów', b:'— kawa ziarnista\n— mleko owsiane\n— chleb na zakwasie' },
+{ t:'Notatka ze spotkania', b:'Priya: build shelfa w piątek.\nKenji: render audio w Sessions.' },
+];
+let noteIdx = 0;
+const nlistEl = $('noteslist'), neditEl = $('noteedit');
+function renderNotes() {
+const frag = document.createDocumentFragment();
+NOTES.forEach((n, i) => {
+const b = document.createElement('button');
+b.className = 'nitem' + (i === noteIdx ? ' active' : '');
+b.innerHTML = '<div class="nt"></div><div class="np"></div>';
+b.querySelector('.nt').textContent = n.t;
+b.querySelector('.np').textContent = (n.b.split('\n')[0] || 'Bez treści').slice(0, 38);
+b.addEventListener('click', () => { noteIdx = i; renderNotes(); });
+frag.appendChild(b);
+});
+nlistEl.replaceChildren(frag);
+if (NOTES[noteIdx] && neditEl.value !== NOTES[noteIdx].b) neditEl.value = NOTES[noteIdx].b;
+}
+$('notenew').addEventListener('click', () => {
+NOTES.unshift({ t:'Nowa notatka', b:'' });
+saveNotes();
+noteIdx = 0;
+renderNotes();
+neditEl.focus();
+});
+neditEl.addEventListener('input', () => {
+const n = NOTES[noteIdx];
+if (!n) return;
+n.b = neditEl.value;
+n.t = (neditEl.value.split('\n')[0] || 'Nowa notatka').slice(0, 30);
+renderNotes();
+saveNotes();
+}, { passive:true });
+function saveNotes() { try { localStorage.setItem('suno-notes', JSON.stringify(NOTES)); } catch (e) { } }
+renderNotes();
+
+/* ============ APLIKACJA: APARAT (getUserMedia + fallback) ============ */
+let camTried = false, shots = 0;
+function startCam() {
+if (camTried) return;
+camTried = true;
+const v = $('camvideo'), fb = $('camfallback');
+if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { fb.style.display = 'grid'; return; }
+navigator.mediaDevices.getUserMedia({ video: { width: 1280 } }).then(s => {
+v.srcObject = s;
+if (v.play) v.play();
+}).catch(() => { fb.style.display = 'grid'; });
+}
+$('shutter').addEventListener('click', () => {
+const f = $('camflash');
+f.style.opacity = '.75';
+setTimeout(() => f.style.opacity = '0', 90);
+shots++;
+$('camcount').textContent = 'Zdjęcia: ' + shots;
+});
+
+/* ============ APLIKACJA: STATYSTYKI (pasek + losowe próbki) ============ */
+const chartEl = $('chart');
+const bars = [];
+for (let i = 0; i < 24; i++) { const b = document.createElement('i'); chartEl.appendChild(b); bars.push(25 + Math.random() * 45); }
+function drawChart() {
+bars.forEach((v, i) => { chartEl.children[i].style.height = v + '%'; });
+$('stcpu').textContent = Math.round(bars[bars.length - 1]) + '%';
+$('stram').textContent = (7.2 + (bars[bars.length - 1] / 100) * 4.5).toFixed(1).replace('.', ',') + ' GB';
+$('stnet').textContent = (Math.random() * 9 + 0.4).toFixed(1).replace('.', ',') + ' MB/s';
+}
+drawChart();
+setInterval(() => {
+bars.shift();
+bars.push(20 + Math.random() * 70);
+drawChart();
+}, 1000);
+
+/* ============ APLIKACJA: AIRDROP (udostępnianie z paskiem postępu) ============ */
+const DEVS = [
+{ n:'iPhone Jakuba', g:'linear-gradient(145deg,#9aa5b5,#525d6e)', s:'W pobliżu' },
+{ n:'Priya — Studio North', g:'linear-gradient(145deg,#d9a06a,#8a5c93)', s:'W sieci' },
+{ n:'Tablet Luma', g:'linear-gradient(145deg,#6fb3ff,#2a6be0)', s:'W pobliżu' },
+{ n:'Telewizor — salon', g:'linear-gradient(145deg,#69dc8f,#28a35c)', s:'W sieci' },
+];
+const adevsEl = $('adevs');
+DEVS.forEach(d => {
+const r = document.createElement('div');
+r.className = 'adev';
+r.innerHTML = '<span class="avatar" style="background:' + d.g + '">' + d.n[0] + '</span>' +
+'<span class="dni"><span class="dn">' + d.n + '</span><span class="dbuf"><i></i></span></span>' +
+'<span class="dst">' + d.s + '</span>';
+r.addEventListener('click', () => {
+if (r.dataset.done) return;
+r.dataset.done = '1';
+const bar = r.querySelector('.dbuf i'), st = r.querySelector('.dst');
+st.textContent = 'Wysyłanie…';
+requestAnimationFrame(() => { bar.style.transition = 'width 1.6s linear'; bar.style.width = '100%'; });
+setTimeout(() => { st.textContent = 'Wysłano ✓'; }, 1650);
+});
+adevsEl.appendChild(r);
+});
+
+/* ============ APLIKACJA: OBSZARY ROBOCZE ============ */
+const WRK = [ { n:'Biurko 1', bg:'bg-fog' }, { n:'Biurko 2', bg:'bg-ember' }, { n:'Biurko 3', bg:'bg-forest' }, { n:'Biurko 4', bg:'bg-rose' } ];
+const workgrid = $('workgrid');
+WRK.forEach((w, i) => {
+const c = document.createElement('div');
+c.className = 'wcard' + (i === 0 ? ' sel' : '');
+c.innerHTML = '<div class="wshot ' + w.bg + '"></div><div class="cvlab"><span>' + w.n + '</span><span class="cnt">' + (i === 0 ? 'Aktywny' : '—') + '</span></div>';
+c.addEventListener('click', () => {
+workgrid.querySelectorAll('.wcard').forEach(x => x.classList.remove('sel'));
+c.classList.add('sel');
+c.querySelector('.cnt').textContent = 'Aktywny';
+workgrid.querySelectorAll('.wcard').forEach((x, j) => { if (x !== c) x.querySelector('.cnt').textContent = '—'; });
+});
+workgrid.appendChild(c);
+});
+
+/* ============ LAUNCHER (All apps), BLOKADA EKRANU, ZASILANIE ============ */
+const launchEl = $('launch'), launchInput = $('launchsearch'), lockEl = $('lock'), powerMenu = $('powermenu');
+function filterLaunch(q) {
+launchEl.querySelectorAll('.lapp').forEach(x => {
+x.style.display = !q || (x.dataset.name || '').toLowerCase().includes(q) ? '' : 'none';
+});
+}
+$('syslogo').addEventListener('click', e => {
+e.stopPropagation();
+const open = !launchEl.classList.contains('open');
+launchEl.classList.toggle('open', open);
+if (open) { launchInput.value = ''; filterLaunch(''); setTimeout(() => launchInput.focus(), 60); }
+});
+launchEl.addEventListener('click', e => { if (e.target === launchEl) launchEl.classList.remove('open'); });
+launchInput.addEventListener('input', e => filterLaunch(e.target.value.trim().toLowerCase()), { passive:true });
+document.querySelector('.lapp[data-cal]').addEventListener('click', () => launchEl.classList.remove('open'));
+
+function showLock() {
+lockEl.classList.add('open');
+[calPop, qsPop].forEach(p => p.classList.remove('open'));
+launchEl.classList.remove('open');
+powerMenu.classList.remove('open');
+}
+lockEl.addEventListener('click', () => lockEl.classList.remove('open'));
+document.querySelector('#qspop .acts button[title="Zablokuj"]').addEventListener('click', showLock);
+const powerBtn = document.querySelector('#qspop .acts button[title="Zasilanie"]');
+powerBtn.addEventListener('click', e => {
+e.stopPropagation();
+const r = powerBtn.getBoundingClientRect();
+powerMenu.style.left = Math.min(r.left - 60, window.innerWidth - 210) + 'px';
+powerMenu.style.top = 'auto';
+powerMenu.style.bottom = (window.innerHeight - r.top + 10) + 'px';
+powerMenu.classList.toggle('open');
+});
+powerMenu.addEventListener('click', e => e.stopPropagation());
+powerMenu.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+if (b.dataset.act === 'restart') { location.reload(); return; }
+showLock();
+}));
+document.addEventListener('click', e => {
+if (!powerMenu.contains(e.target) && !powerBtn.contains(e.target)) powerMenu.classList.remove('open');
+}, { passive:true });
+
+/* Kalendarz z ikony doku + Escape zamyka wszystkie warstwy */
+$('calicon').addEventListener('click', e => { e.stopPropagation(); buildCal(); togglePop(calPop); });
+document.addEventListener('keydown', e => {
+if (e.key !== 'Escape') return;
+if (lockEl.classList.contains('open')) { lockEl.classList.remove('open'); return; }
+launchEl.classList.remove('open');
+powerMenu.classList.remove('open');
+[calPop, qsPop].forEach(p => p.classList.remove('open'));
+});
+
+/* ============ PRZYWRACANIE USTAWIEŃ PO URUCHOMIENIU ============ */
+function loadPrefs() {
+let p = null;
+try { p = JSON.parse(localStorage.getItem('suno-prefs') || 'null'); } catch (e) { p = null; }
+if (!p) return;
+if (p.theme === 'light' || p.theme === 'dark') applyTheme(p.theme);
+if (p.accent) { const b = [...adots].find(a => a.dataset.color === p.accent); if (b) applyAccent(b); }
+if (p.bg) { const b = [...bgths].find(x => x.dataset.bg === p.bg); if (b) b.click(); }
+if (p.effect) { const b = [...fxBtns].find(x => x.dataset.fx === p.effect); if (b) b.click(); }
+if (p.nl) { const nb = document.querySelector('.qtog[data-t="nl"]'); if (nb) nb.classList.add('on'); }
+$('nlwash').classList.toggle('on', !!p.nl);
+if (p.tint === false) { $('tinttgl').classList.remove('on'); root.classList.remove('tint'); }
+}
+loadPrefs();
 </script>
 </body>
 </html>
