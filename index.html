@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Prism OS</title>
+<title>SunoOS</title>
 <style>
 /* ================================================================
 TOKENY
@@ -556,6 +556,29 @@ transition:transform .45s var(--ease), opacity .3s;
 .addmenu button:hover { background:var(--hover); color:var(--ink); }
 .addmenu button:disabled { opacity:.4; cursor:default; }
 
+/* ================================================================
+MENEDŻER OKIEN: przeciąganie za pasek tytułu, zmiana rozmiaru z
+8 kierunków (uchwyty generowane w JS), minimalizacja (wrót do
+poprzedniego stanu z doku — miniatury w wyspie okien).
+================================================================ */
+.window.dragging { transition:none; user-select:none; }
+.titlebar { cursor:grab; }
+.titlebar:active { cursor:grabbing; }
+.rz { position:absolute; z-index:30; }
+.rz.n { top:-3px; left:10px; right:10px; height:7px; cursor:ns-resize; }
+.rz.s { bottom:-3px; left:10px; right:10px; height:7px; cursor:ns-resize; }
+.rz.e { right:-3px; top:10px; bottom:10px; width:7px; cursor:ew-resize; }
+.rz.w { left:-3px; top:10px; bottom:10px; width:7px; cursor:ew-resize; }
+.rz.ne { top:-3px; right:-3px; width:14px; height:14px; cursor:nesw-resize; }
+.rz.nw { top:-3px; left:-3px; width:14px; height:14px; cursor:nwse-resize; }
+.rz.se { bottom:-3px; right:-3px; width:14px; height:14px; cursor:nwse-resize; }
+.rz.sw { bottom:-3px; left:-3px; width:14px; height:14px; cursor:nesw-resize; }
+
+/* Logo SunoOS (zaćmienie Słońca) w wyspie aplikacji */
+.syslogo { background:#000; overflow:hidden; }
+html[data-theme="light"] .syslogo { background:#000; }
+.syslogo img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; border-radius:50%; }
+
 @media (max-width:1100px) { .settings { display:none; } }
 @media (max-width:900px) { .filer { width:94vw; left:3%; height:78%; } .fside { width:70px; } }
 </style>
@@ -747,15 +770,8 @@ Settings
 <!-- ============ DOK: 4 niezależne wyspy + tryb aranżacji ============ -->
 <div class="dock" id="dock">
 <div class="island" data-widget="apps" id="isl-apps">
-<div class="syslogo" id="syslogo" title="Prism OS">
-<svg viewBox="0 0 24 24" fill="none">
-<path d="M12 3.2L21 19.4H3z" stroke="url(#lg1)" stroke-width="2" stroke-linejoin="round"/>
-<path d="M12 8.6L16.6 17h-9.2z" fill="url(#lg2)" opacity=".85"/>
-<defs>
-<linearGradient id="lg1" x1="3" y1="3" x2="21" y2="21"><stop stop-color="#c9b8ff"/><stop offset=".5" stop-color="#b07af7"/><stop offset="1" stop-color="#7a4fe0"/></linearGradient>
-<linearGradient id="lg2" x1="7" y1="9" x2="17" y2="17"><stop stop-color="#e6d9ff"/><stop offset="1" stop-color="#a678f2"/></linearGradient>
-</defs>
-</svg>
+<div class="syslogo" id="syslogo" title="SunoOS">
+<img src="assets/suno-logo.jpg" alt="Logo SunoOS" draggable="false" />
 </div>
 <span class="divider"></span>
 <div class="aicon ic-blue" data-open="win-filer" title="Filer"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linejoin="round"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h4l2 2.5h7A1.5 1.5 0 0 1 20 9v8.5a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 17.5z"/><path d="M4 10.5h16" stroke="rgba(255,255,255,.55)"/></svg><span class="dot-run"></span></div>
@@ -910,12 +926,95 @@ if (+w.style.zIndex !== zTop) raise(w.id);
 }));
 document.querySelectorAll('.winbtn.close').forEach(b => b.addEventListener('click', () => {
 b.closest('.window').classList.add('hidden');
+updateWinCount();
 }));
+/* min: minimalizacja okna — powrót przez miniaturę w wyspie okien doku */
+document.querySelectorAll('.winbtn.min').forEach(b => b.addEventListener('click', () => {
+b.closest('.window').classList.add('hidden');
+updateWinCount();
+}));
+function updateWinCount() {
+const n = document.querySelectorAll('.window:not(.hidden)').length;
+const pill = $('wincount');
+if (pill) pill.textContent = n;
+const isl = document.querySelector('#isl-windows > .badge');
+if (isl) isl.textContent = n;
+}
 /* max: przełączanie zmaksymalizowanego/normalnego rozmiaru okna */
 document.querySelectorAll('.winbtn.max').forEach(b => b.addEventListener('click', () => {
 b.closest('.window').classList.toggle('maximized');
 }));
-document.querySelectorAll('[data-open]').forEach(el => el.addEventListener('click', () => raise(el.dataset.open)));
+document.querySelectorAll('[data-open]').forEach(el => el.addEventListener('click', () => { raise(el.dataset.open); updateWinCount(); }));
+
+/* ============ PRZESUWANIE I ZMIANA ROZMIARU OKIEN ============ */
+const WIN_MINW = 520, WIN_MINH = 320;
+function toPx(win) {
+const r = win.getBoundingClientRect();
+win.style.left = r.left + 'px';
+win.style.top = r.top + 'px';
+win.style.width = r.width + 'px';
+win.style.height = r.height + 'px';
+}
+document.querySelectorAll('.window').forEach(win => {
+const tb = win.querySelector('.titlebar');
+let mode = null, sx = 0, sy = 0, ox = 0, oy = 0, rect = null, dir = '';
+const endMode = () => { mode = null; rect = null; win.classList.remove('dragging'); };
+
+tb.addEventListener('dblclick', e => {
+if (e.target.closest('.winbtn')) return;
+win.classList.toggle('maximized');
+});
+tb.addEventListener('pointerdown', e => {
+if (e.target.closest('.winbtn') || win.classList.contains('maximized')) return;
+mode = 'move';
+toPx(win);
+sx = e.clientX; sy = e.clientY;
+ox = win.offsetLeft; oy = win.offsetTop;
+win.classList.add('dragging');
+tb.setPointerCapture(e.pointerId);
+e.preventDefault();
+});
+tb.addEventListener('pointermove', e => {
+if (mode !== 'move') return;
+win.style.left = Math.max(-win.offsetWidth + 80, Math.min(ox + e.clientX - sx, innerWidth - 80)) + 'px';
+win.style.top = Math.max(0, Math.min(oy + e.clientY - sy, innerHeight - 42)) + 'px';
+});
+tb.addEventListener('pointerup', endMode);
+tb.addEventListener('pointercancel', endMode);
+
+['n','s','e','w','ne','nw','se','sw'].forEach(d => {
+const hd = document.createElement('div');
+hd.className = 'rz ' + d;
+win.appendChild(hd);
+hd.addEventListener('pointerdown', e => {
+if (win.classList.contains('maximized')) return;
+dir = d; mode = 'resize';
+toPx(win);
+rect = { x: win.offsetLeft, y: win.offsetTop, w: win.offsetWidth, h: win.offsetHeight };
+sx = e.clientX; sy = e.clientY;
+win.classList.add('dragging');
+hd.setPointerCapture(e.pointerId);
+e.preventDefault();
+e.stopPropagation();
+});
+hd.addEventListener('pointermove', e => {
+if (mode !== 'resize') return;
+const dx = e.clientX - sx, dy = e.clientY - sy;
+let x = rect.x, y = rect.y, w = rect.w, hh = rect.h;
+if (dir.includes('e')) w = Math.max(WIN_MINW, rect.w + dx);
+if (dir.includes('s')) hh = Math.max(WIN_MINH, rect.h + dy);
+if (dir.includes('w')) { w = Math.max(WIN_MINW, rect.w - dx); x = rect.x + rect.w - w; }
+if (dir.includes('n')) { hh = Math.max(WIN_MINH, rect.h - dy); y = rect.y + rect.h - hh; }
+win.style.left = x + 'px';
+win.style.top = y + 'px';
+win.style.width = w + 'px';
+win.style.height = hh + 'px';
+});
+hd.addEventListener('pointerup', endMode);
+hd.addEventListener('pointercancel', endMode);
+});
+});
+updateWinCount();
 
 /* ============ EFEKT SZKŁA + MOTYW (skrót i karty w Settings) ============ */
 const fxBtns = document.querySelectorAll('.fx-btn');
@@ -1158,7 +1257,7 @@ const dock = $('dock'), editBtn = $('dockedit'), addBtn = $('dockadd'), addMenu 
 let editOn = false, dragEl = null;
 function saveDock() {
 try {
-localStorage.setItem('prism-dock', JSON.stringify({
+localStorage.setItem('suno-dock', JSON.stringify({
 order: [...dock.querySelectorAll('.island,[data-widget]')].filter(n => n.dataset.widget).map(n => n.dataset.widget),
 hidden: [...dock.querySelectorAll('[data-widget]')].filter(n => n.style.display === 'none').map(n => n.dataset.widget),
 }));
@@ -1166,7 +1265,7 @@ hidden: [...dock.querySelectorAll('[data-widget]')].filter(n => n.style.display 
 }
 function restoreDock() {
 let data;
-try { data = JSON.parse(localStorage.getItem('prism-dock') || 'null'); } catch (e) { data = null; }
+try { data = JSON.parse(localStorage.getItem('suno-dock') || 'null'); } catch (e) { data = null; }
 if (!data) return;
 data.order.forEach(w => {
 const isl = dock.querySelector('[data-widget="' + w + '"]');
