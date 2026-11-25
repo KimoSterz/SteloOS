@@ -241,7 +241,6 @@ box-shadow: 0 8px 28px color-mix(in srgb, var(--accent) 13%, transparent), 0 2px
 .filer[data-view="list"] .fgitem .meta { margin:0; }
 .filer[data-view="list"] .folder, .filer[data-view="list"] .thumb { width:34px; height:26px; }
 .filer[data-view="list"] .doc { width:26px; height:34px; padding-top:12px; }
-.filer[data-view="cols"] .fgrid { grid-template-columns:repeat(auto-fill, minmax(84px,1fr)); gap:14px 4px; }
 
 /* Pływający toolbar na dole treści */
 .ftoolbar {
@@ -284,10 +283,20 @@ box-shadow: 0 8px 28px color-mix(in srgb, var(--accent) 10%, transparent), 0 2px
 .nav-item svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:1.7; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0; }
 .nav-item .val { margin-left:auto; font-size:11px; color:var(--ink-3); }
 .nav-h { font-size:10.5px; font-weight:600; color:var(--ink-3); padding:14px 10px 5px; }
-.side-search { padding:10px; border-top:1px solid var(--border); }
-.searchbox { display:flex; align-items:center; gap:8px; background:var(--btn); border:1px solid var(--border); border-radius:9px; padding:7px 10px; color:var(--ink-3); }
-.searchbox svg { width:13px; height:13px; stroke:currentColor; fill:none; stroke-width:1.8; flex-shrink:0; }
-.searchbox input { border:none; background:transparent; outline:none; color:var(--ink); font-size:12px; width:100%; font-family:var(--font); }
+/* Nagłówek kolumn widoku listy (typ / rozmiar / modyfikacja) */
+.flisthead { display:none; padding:10px 22px 2px; border-bottom:1px solid var(--border); font-size:10px; font-weight:700; color:var(--ink-3); }
+.filer[data-view="list"] .flisthead { display:flex; align-items:center; }
+.flisthead .icol { width:34px; margin-right:12px; flex-shrink:0; }
+.flisthead .hname { flex:1; }
+.flisthead .htype { width:110px; flex-shrink:0; }
+.flisthead .hsize { width:90px; flex-shrink:0; text-align:right; padding-right:14px; }
+.flisthead .hdate { width:110px; flex-shrink:0; text-align:right; }
+.fcol { display:none; font-size:10.5px; color:var(--ink-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.filer[data-view="list"] .fcol { display:block; }
+.filer[data-view="list"] .fcol.type { width:110px; flex-shrink:0; }
+.filer[data-view="list"] .fcol.size { width:90px; text-align:right; flex-shrink:0; padding-right:14px; }
+.filer[data-view="list"] .fcol.date { width:110px; text-align:right; flex-shrink:0; }
+.filer[data-view="list"] .fgitem .meta { display:none; }
 
 .content { flex:1; overflow-y:auto; padding:16px 44px 70px; }
 .content h1 { font-size:25px; font-weight:700; }
@@ -648,6 +657,13 @@ Filer
 <h1>Launch</h1>
 <div class="crumbs"><b>Home</b><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg><b>Projects</b><span>·</span><span id="itemcount">14 items</span></div>
 </div>
+<div class="flisthead" id="flisthead">
+<span class="icol"></span>
+<span class="hname">Nazwa</span>
+<span class="htype">Typ</span>
+<span class="hsize">Rozmiar</span>
+<span class="hdate">Modyfikacja</span>
+</div>
 <div class="fgrid" id="fgrid"></div>
 <div class="ftoolbar glass">
 <button class="tool" aria-label="Wstecz">‹</button>
@@ -656,7 +672,6 @@ Filer
 <div class="vseg">
 <button class="tool active" data-view="grid" title="Siatka"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="6.5" height="6.5" rx="1.4"/><rect x="13.5" y="4" width="6.5" height="6.5" rx="1.4"/><rect x="4" y="13.5" width="6.5" height="6.5" rx="1.4"/><rect x="13.5" y="13.5" width="6.5" height="6.5" rx="1.4"/></svg></button>
 <button class="tool" data-view="list" title="Lista"><svg viewBox="0 0 24 24"><path d="M4 6.5h16M4 12h16M4 17.5h16"/></svg></button>
-<button class="tool" data-view="cols" title="Kolumny"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="4.6" height="16" rx="1.2"/><rect x="9.7" y="4" width="4.6" height="16" rx="1.2"/><rect x="15.4" y="4" width="4.6" height="16" rx="1.2"/></svg></button>
 </div>
 <button class="tool" title="Informacje" style="border-radius:50%;padding:0;width:30px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 7.8h.01"/></svg></button>
 <button class="tool newfolder" id="newfolder">＋ New folder</button>
@@ -709,9 +724,6 @@ Settings
 <button class="nav-item"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5v17"/></svg>Online Accounts</button>
 <button class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 3l7.5 3v5.5c0 4.5-3.2 7.7-7.5 9.5-4.3-1.8-7.5-5-7.5-9.5V6z"/></svg>Privacy & Security</button>
 </div>
-<div class="side-search">
-<label class="searchbox"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.6-4.6"/></svg><input type="text" placeholder="Search settings" /></label>
-</div>
 </div>
 <div class="set-content">
 <div class="content">
@@ -761,7 +773,6 @@ Settings
 <button class="tool" style="opacity:.45" aria-label="Dalej">›</button>
 <label class="fsearch" style="width:190px"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.6-4.6"/></svg><input type="text" id="setsearch" placeholder="Search settings" /></label>
 <button class="tool" title="Informacje" style="border-radius:50%;padding:0;width:30px"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 7.8h.01"/></svg></button>
-<button class="tool newfolder" id="resetbtn">↺ Przywróć domyślne</button>
 </div>
 </div>
 </div>
@@ -1067,40 +1078,30 @@ $('tinttgl').classList.toggle('on');
 root.classList.toggle('tint', $('tinttgl').classList.contains('on'));
 });
 
-/* Pasek narzędzi Ustawień: szukajka filtruje pozycje sidebara,
-"Przywróć domyślne" wraca do stanu z zrzutu (Dark/Purple/Blue fog/tint). */
+/* Pasek narzędzi Ustawień: szukajka filtruje pozycje sidebara. */
 $('setsearch').addEventListener('input', e => {
 const q = e.target.value.trim().toLowerCase();
 document.querySelectorAll('.set-side .nav-item, .set-side .nav-h').forEach(n => {
 n.style.display = !q || n.textContent.toLowerCase().includes(q) ? '' : 'none';
 });
 }, { passive:true });
-$('resetbtn').addEventListener('click', () => {
-applyTheme('dark');
-const purple = [...adots].find(a => a.dataset.name === 'Purple');
-if (purple) applyAccent(purple);
-const fog = [...bgths].find(b => b.dataset.bg === 'fog');
-if (fog) fog.click();
-$('tinttgl').classList.add('on');
-root.classList.add('tint');
-});
 
 /* ============ FILER: siatka plików (data-driven), widoki, szukanie ============ */
 const FILES = [
-{ t:'folder', nm:'Press kit', meta:'12 items' },
-{ t:'folder', nm:'Screens', meta:'48 items' },
-{ t:'folder', nm:'Website', meta:'31 items' },
-{ t:'folder', nm:'Fonts', meta:'6 items' },
-{ t:'img', cls:'im-terrace', nm:'hero-writing.webp', meta:'412 KB' },
-{ t:'img', cls:'im-field', nm:'field-desk.webp', meta:'388 KB' },
-{ t:'img', cls:'im-ari', nm:'ari-demo.mov', meta:'1.2 GB', movie:false },
-{ t:'doc', tag:'STAGE', dots:true, nm:'launch-deck.stage', meta:'18.4 MB' },
-{ t:'doc', tag:'GRID', nm:'budget-q4.grid', meta:'96 KB' },
-{ t:'doc', tag:'WRITE', tagColor:'#2a6be0', nm:'press-release.write', meta:'48 KB' },
-{ t:'doc', tag:'MD', tagColor:'#84878f', nm:'launch-plan.md', meta:'14 KB' },
-{ t:'doc', tag:'PDF', tagColor:'#84878f', nm:'why-letter.pdf', meta:'2.1 MB' },
-{ t:'img', cls:'im-terrace2', nm:'terrace.webp', meta:'356 KB' },
-{ t:'img', cls:'im-standup', nm:'standup.ogg', meta:'3.4 MB' },
+{ t:'folder', nm:'Press kit', meta:'12 items', ty:'Folder', dt:'20 maj 2026' },
+{ t:'folder', nm:'Screens', meta:'48 items', ty:'Folder', dt:'18 lis 2026' },
+{ t:'folder', nm:'Website', meta:'31 items', ty:'Folder', dt:'2 paź 2026' },
+{ t:'folder', nm:'Fonts', meta:'6 items', ty:'Folder', dt:'9 kwi 2026' },
+{ t:'img', cls:'im-terrace', nm:'hero-writing.webp', meta:'412 KB', ty:'Obraz WebP', dt:'24 lis 2026' },
+{ t:'img', cls:'im-field', nm:'field-desk.webp', meta:'388 KB', ty:'Obraz WebP', dt:'22 lis 2026' },
+{ t:'img', cls:'im-ari', nm:'ari-demo.mov', meta:'1.2 GB', movie:false, ty:'Wideo MOV', dt:'21 lis 2026' },
+{ t:'doc', tag:'STAGE', dots:true, nm:'launch-deck.stage', meta:'18.4 MB', ty:'Prezentacja', dt:'25 lis 2026' },
+{ t:'doc', tag:'GRID', nm:'budget-q4.grid', meta:'96 KB', ty:'Arkusz', dt:'20 lis 2026' },
+{ t:'doc', tag:'WRITE', tagColor:'#2a6be0', nm:'press-release.write', meta:'48 KB', ty:'Dokument', dt:'19 lis 2026' },
+{ t:'doc', tag:'MD', tagColor:'#84878f', nm:'launch-plan.md', meta:'14 KB', ty:'Markdown', dt:'15 lis 2026' },
+{ t:'doc', tag:'PDF', tagColor:'#84878f', nm:'why-letter.pdf', meta:'2.1 MB', ty:'Dokument PDF', dt:'10 lis 2026' },
+{ t:'img', cls:'im-terrace2', nm:'terrace.webp', meta:'356 KB', ty:'Obraz WebP', dt:'8 lis 2026' },
+{ t:'img', cls:'im-standup', nm:'standup.ogg', meta:'3.4 MB', ty:'Audio OGG', dt:'1 lis 2026' },
 ];
 const fgrid = $('fgrid'), itemCount = $('itemcount');
 function fileNode(f) {
@@ -1123,7 +1124,10 @@ if (f.dots) icon.innerHTML += '<span class="dotsrow"><i></i><i></i><i></i><i></i
 }
 const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = f.nm;
 const mt = document.createElement('span'); mt.className = 'meta'; mt.textContent = f.meta;
-it.append(icon, nm, mt);
+const ct = document.createElement('span'); ct.className = 'fcol type'; ct.textContent = f.ty || 'Plik';
+const cs = document.createElement('span'); cs.className = 'fcol size'; cs.textContent = f.t === 'folder' ? '—' : f.meta;
+const cd = document.createElement('span'); cd.className = 'fcol date'; cd.textContent = f.dt || '—';
+it.append(icon, nm, ct, cs, cd, mt);
 return it;
 }
 function renderFiles(filter) {
