@@ -7,6 +7,7 @@ Przeglądarkowy system operacyjny w jednym pliku (`index.html`), inspirowany m.i
 - Launcher „All apps" (klik w logo — zaćmienie Słońca `assets/suno-logo.jpg`) z szukajką
 - Ekran blokady + menu zasilania (QS: zablokuj / uśpij / restart), tryb nocny, poziom baterii (gdy API dostępne)
 - Dock z wyspami: miniatury otwartych okien (zamykanie ✕ z miniatury), kropki „uruchomiona aplikacja", QS, kalendarz, tryb aranżacji z drag & drop
-- Ustawienia trwałe w `localStorage` (`suno-prefs`): motyw, akcent, tapeta, efekt szkła, tint, tryb nocny
+- Motyw systemowy: dopóki nie wybierzesz motywu ręcznie, SunoOS podąża za preferencją systemową (`prefers-color-scheme`, także na żywo) — bez mignięcia tłem przy starcie
+- Ustawienia trwałe w `localStorage` (`suno-prefs`): motyw (tylko wybór ręczny), akcent, tapeta, efekt szkła, tint, tryb nocny
 
 Start: otwórz `index.html` w przeglądarce albo włącz GitHub Pages.
