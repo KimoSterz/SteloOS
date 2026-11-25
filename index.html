@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prism OS</title>
+<style>
+  :root {
+    --accent: #7c6cff;
+    --accent-soft: rgba(124, 108, 255, 0.35);
+    --bg: linear-gradient(135deg, #1a1c2c 0%, #2b2d55 45%, #4a3f8f 100%);
+    --window-bg: rgba(28, 30, 48, 0.92);
+    --text: #eef0ff;
+    --text-dim: #9aa0c8;
+    --bar-bg: rgba(18, 20, 34, 0.85);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; overflow: hidden; font-family: 'Segoe UI', system-ui, sans-serif; color: var(--text); }
+  body { background: var(--bg); transition: background 0.5s; }
+
+  #desktop { position: absolute; inset: 0 0 48px 0; }
+
+  #taskbar {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 48px;
+    background: var(--bar-bg); backdrop-filter: blur(12px);
+    display: flex; align-items: center; padding: 0 12px; gap: 8px; z-index: 100000;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  #startBtn {
+    width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
+    background: var(--accent); color: #fff; font-size: 18px; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+  }
+  #startBtn:hover { filter: brightness(1.15); }
+  .taskbar-item {
+    height: 36px; padding: 0 14px; border-radius: 18px; border: none; cursor: pointer;
+    background: rgba(255,255,255,0.08); color: var(--text); font-size: 13px;
+    display: flex; align-items: center; gap: 6px; max-width: 180px; overflow: hidden;
+    white-space: nowrap; text-overflow: ellipsis;
+  }
+  .taskbar-item.active { background: var(--accent-soft); }
+  #clock { margin-left: auto; font-size: 13px; color: var(--text-dim); padding: 0 8px; }
+
+  #startMenu {
+    position: absolute; left: 12px; bottom: 56px; width: 260px; z-index: 100001;
+    background: var(--bar-bg); backdrop-filter: blur(16px); border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.1); padding: 10px; display: none;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  }
+  #startMenu.open { display: block; }
+  .menu-app {
+    width: 100%; padding: 12px; border: none; border-radius: 10px; cursor: pointer;
+    background: transparent; color: var(--text); text-align: left; font-size: 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .menu-app:hover { background: rgba(255,255,255,0.08); }
+
+  .window {
+    position: absolute; min-width: 280px; min-height: 180px;
+    background: var(--window-bg); backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.12); border-radius: 12px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.45); display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .window.minimized { display: none; }
+  .titlebar {
+    height: 38px; flex: 0 0 38px; display: flex; align-items: center;
+    padding: 0 10px; gap: 8px; cursor: grab; user-select: none;
+    background: rgba(255,255,255,0.05); border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .titlebar .win-title { font-size: 13px; font-weight: 600; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .win-btn {
+    width: 14px; height: 14px; border-radius: 50%; border: none; cursor: pointer;
+    font-size: 0; line-height: 0; padding: 0;
+  }
+  .win-btn.close { background: #ff5f57; }
+  .win-btn.minimize { background: #febc2e; }
+  .win-btn.maximize { background: #28c840; }
+  .win-btn:hover { filter: brightness(1.2); }
+  .win-content { flex: 1; overflow: auto; }
+
+  .rz { position: absolute; z-index: 10; }
+  .rz.n { top: -4px; left: 8px; right: 8px; height: 8px; cursor: ns-resize; }
+  .rz.s { bottom: -4px; left: 8px; right: 8px; height: 8px; cursor: ns-resize; }
+  .rz.e { right: -4px; top: 8px; bottom: 8px; width: 8px; cursor: ew-resize; }
+  .rz.w { left: -4px; top: 8px; bottom: 8px; width: 8px; cursor: ew-resize; }
+  .rz.ne { top: -4px; right: -4px; width: 14px; height: 14px; cursor: nesw-resize; }
+  .rz.nw { top: -4px; left: -4px; width: 14px; height: 14px; cursor: nwse-resize; }
+  .rz.se { bottom: -4px; right: -4px; width: 14px; height: 14px; cursor: nwse-resize; }
+  .rz.sw { bottom: -4px; left: -4px; width: 14px; height: 14px; cursor: nesw-resize; }
+
+  .app { height: 100%; display: flex; flex-direction: column; }
+  .app-body { flex: 1; overflow: auto; }
+
+  .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 14px; }
+  .settings-row input[type="color"] { width: 42px; height: 28px; border: none; background: none; cursor: pointer; }
+  .settings-row select, .settings-row input[type="text"] {
+    background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 8px; padding: 6px 10px; font-size: 13px;
+  }
+
+  #notes-area {
+    flex: 1; width: 100%; resize: none; border: none; outline: none;
+    background: transparent; color: var(--text); padding: 16px; font-size: 15px;
+    line-height: 1.6; font-family: inherit;
+  }
+  .notes-status { padding: 8px 16px; font-size: 12px; color: var(--text-dim); border-top: 1px solid rgba(255,255,255,0.06); }
+
+  #chat-log { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .chat-msg { max-width: 75%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.45; word-wrap: break-word; }
+  .chat-msg.me { align-self: flex-end; background: var(--accent); color: #fff; border-bottom-right-radius: 4px; }
+  .chat-msg.bot { align-self: flex-start; background: rgba(255,255,255,0.1); border-bottom-left-radius: 4px; }
+  #chat-form { display: flex; gap: 8px; padding: 12px; border-top: 1px solid rgba(255,255,255,0.08); }
+  #chat-input {
+    flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px; padding: 10px 16px; color: var(--text); font-size: 14px; outline: none;
+  }
+  #chat-send {
+    background: var(--accent); color: #fff; border: none; border-radius: 20px;
+    padding: 0 18px; cursor: pointer; font-size: 14px; font-weight: 600;
+  }
+
+  #camera-video, #camera-snapshot { width: 100%; flex: 1; object-fit: cover; background: #000; min-height: 0; }
+  .camera-controls { display: flex; gap: 10px; padding: 12px; justify-content: center; border-top: 1px solid rgba(255,255,255,0.08); }
+  .camera-controls button {
+    background: var(--accent); color: #fff; border: none; border-radius: 10px;
+    padding: 10px 20px; cursor: pointer; font-size: 14px;
+  }
+  .camera-controls button.secondary { background: rgba(255,255,255,0.12); }
+  .camera-error { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; color: var(--text-dim); padding: 20px; font-size: 14px; }
+
+  .about { padding: 24px; text-align: center; }
+  .about h1 { font-size: 28px; margin-bottom: 6px; }
+  .about p { color: var(--text-dim); font-size: 14px; }
+</style>
+</head>
+<body>
+  <div id="desktop"></div>
+
+  <div id="startMenu"></div>
+
+  <div id="taskbar">
+    <button id="startBtn" title="Start">◈</button>
+    <div id="taskItems" style="display:flex;gap:8px;"></div>
+    <div id="clock"></div>
+  </div>
+
+<script>
+(function () {
+  'use strict';
+
+  const STORAGE_KEY = 'prism-os-settings-v1';
+  const desktop = document.getElementById('desktop');
+  const taskItems = document.getElementById('taskItems');
+  const startMenu = document.getElementById('startMenu');
+  const startBtn = document.getElementById('startBtn');
+  const clockEl = document.getElementById('clock');
+
+  let zIndexCounter = 100;
+  const windows = new Map();
+
+  /* ---------------- Persistence ---------------- */
+
+  function loadState() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveState() {
+    const data = {
+      theme: {
+        accent: document.documentElement.style.getPropertyValue('--accent') || '#7c6cff',
+        wallpaper: document.body.dataset.wallpaper || 'aurora'
+      },
+      notes: document.getElementById('notes-area') ? document.getElementById('notes-area').value : '',
+      chat: chatHistory,
+      windows: {}
+    };
+    windows.forEach((win, id) => {
+      data.windows[id] = { x: win.el.offsetLeft, y: win.el.offsetTop, w: win.el.offsetWidth, h: win.el.offsetHeight };
+    });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  const state = loadState();
+
+  /* ---------------- Theme ---------------- */
+
+  const wallpapers = {
+    aurora: 'linear-gradient(135deg, #1a1c2c 0%, #2b2d55 45%, #4a3f8f 100%)',
+    sunset: 'linear-gradient(135deg, #2c1a2e 0%, #552b3d 45%, #8f3f4a 100%)',
+    ocean: 'linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%)',
+    forest: 'linear-gradient(135deg, #0b1e13 0%, #14381f 50%, #1f5c33 100%)',
+    mono: 'linear-gradient(135deg, #101014 0%, #23232b 50%, #3a3a46 100%)'
+  };
+
+  function applyTheme(theme) {
+    theme = theme || (state.theme || {});
+    if (theme.accent) {
+      document.documentElement.style.setProperty('--accent', theme.accent);
+      document.documentElement.style.setProperty('--accent-soft', hexToRgba(theme.accent, 0.35));
+    }
+    const wp = theme.wallpaper || 'aurora';
+    document.body.dataset.wallpaper = wp;
+    if (wallpapers[wp]) document.body.style.background = wallpapers[wp];
+  }
+
+  function hexToRgba(hex, alpha) {
+    const m = hex.replace('#', '');
+    const full = m.length === 3 ? m.split('').map(c => c + c).join('') : m;
+    const num = parseInt(full, 16);
+    return 'rgba(' + ((num >> 16) & 255) + ', ' + ((num >> 8) & 255) + ', ' + (num & 255) + ', ' + alpha + ')';
+  }
+
+  applyTheme();
+  window.addEventListener('beforeunload', saveState);
+
+  /* ---------------- Clock ---------------- */
+
+  function tickClock() {
+    const d = new Date();
+    clockEl.textContent = d.toLocaleDateString('pl-PL', { weekday: 'short', day: 'numeric', month: 'short' }) +
+      '  ' + d.toLocaleTimeString('pl-PL', { hour: '2-digit', minute: '2-digit' });
+  }
+  tickClock();
+  setInterval(tickClock, 10000);
+
+  /* ---------------- Apps registry ---------------- */
+
+  const apps = {
+    notes: { title: 'Notatki', icon: '📝', w: 520, h: 400, render: renderNotes },
+    chat: { title: 'Czat', icon: '💬', w: 420, h: 520, render: renderChat },
+    camera: { title: 'Aparat', icon: '📷', w: 640, h: 480, render: renderCamera },
+    settings: { title: 'Ustawienia', icon: '⚙️', w: 440, h: 360, render: renderSettings },
+    about: { title: 'O systemie', icon: '💎', w: 380, h: 260, render: renderAbout }
+  };
+
+  /* ---------------- Window manager ---------------- */
+
+  function focusWindow(win) {
+    win.el.style.zIndex = ++zIndexCounter;
+    windows.forEach(w => w.taskItem.classList.remove('active'));
+    win.taskItem.classList.add('active');
+    if (win.appId === 'camera') cameraStart(win);
+  }
+
+  function createWindow(appId) {
+    if (windows.has(appId)) {
+      const win = windows.get(appId);
+      win.el.classList.remove('minimized');
+      focusWindow(win);
+      return win;
+    }
+
+    const app = apps[appId];
+    const saved = (state.windows || {})[appId];
+    const desktopRect = desktop.getBoundingClientRect();
+
+    const el = document.createElement('div');
+    el.className = 'window';
+    el.style.width = (saved ? saved.w : app.w) + 'px';
+    el.style.height = (saved ? saved.h : app.h) + 'px';
+    el.style.left = Math.min(saved ? saved.x : 80 + windows.size * 30, Math.max(0, desktopRect.width - 300)) + 'px';
+    el.style.top = Math.min(saved ? saved.y : 40 + windows.size * 28, Math.max(0, desktopRect.height - 200)) + 'px';
+
+    el.innerHTML =
+      '<div class="titlebar">' +
+        '<span class="win-title">' + app.icon + ' ' + app.title + '</span>' +
+        '<button class="win-btn minimize" title="Minimalizuj"></button>' +
+        '<button class="win-btn maximize" title="Maksymalizuj"></button>' +
+        '<button class="win-btn close" title="Zamknij"></button>' +
+      '</div>' +
+      '<div class="win-content"></div>' +
+      ['n', 's', 'e', 'w', 'ne', 'nw', 'se', 'sw'].map(dir =>
+        '<div class="rz ' + dir + '" data-dir="' + dir + '"></div>').join('');
+
+    desktop.appendChild(el);
+
+    const win = { el, appId, prevRect: null };
+    windows.set(appId, win);
+
+    const content = el.querySelector('.win-content');
+    content.appendChild(app.render());
+
+    const savedNotes = document.getElementById('notes-area');
+    if (savedNotes && state.notes) savedNotes.value = state.notes;
+
+    el.querySelector('.close').addEventListener('click', () => closeWindow(appId));
+    el.querySelector('.minimize').addEventListener('click', () => {
+      el.classList.add('minimized');
+      win.taskItem.classList.remove('active');
+      if (appId === 'camera') cameraStop();
+      saveState();
+    });
+    el.querySelector('.maximize').addEventListener('click', () => toggleMaximize(win));
+
+    el.addEventListener('mousedown', () => focusWindow(win));
+
+    makeDraggable(win, el.querySelector('.titlebar'));
+    makeResizable(win, el);
+
+    addTaskbarItem(win);
+    focusWindow(win);
+    return win;
+  }
+
+  function closeWindow(appId) {
+    const win = windows.get(appId);
+    if (!win) return;
+    if (appId === 'camera') cameraStop();
+    win.el.remove();
+    win.taskItem.remove();
+    windows.delete(appId);
+    saveState();
+  }
+
+  function toggleMaximize(win) {
+    if (win.prevRect) {
+      Object.assign(win.el.style, win.prevRect);
+      win.prevRect = null;
+    } else {
+      win.prevRect = {
+        left: win.el.style.left, top: win.el.style.top,
+        width: win.el.style.width, height: win.el.style.height
+      };
+      Object.assign(win.el.style, { left: '0px', top: '0px', width: '100%', height: '100%' });
+    }
+    saveState();
+  }
+
+  function makeDraggable(win, handle) {
+    let sx, sy, ox, oy, dragging = false;
+    handle.addEventListener('mousedown', e => {
+      if (e.target.classList.contains('win-btn')) return;
+      dragging = true;
+      sx = e.clientX; sy = e.clientY;
+      ox = win.el.offsetLeft; oy = win.el.offsetTop;
+      win.el.style.maxWidth = 'none';
+      e.preventDefault();
+    });
+    window.addEventListener('mousemove', e => {
+      if (!dragging) return;
+      const max = desktop.getBoundingClientRect();
+      win.el.style.left = Math.max(-win.el.offsetWidth + 80, Math.min(ox + e.clientX - sx, max.width - 60)) + 'px';
+      win.el.style.top = Math.max(0, Math.min(oy + e.clientY - sy, max.height - 38)) + 'px';
+    });
+    window.addEventListener('mouseup', () => {
+      if (dragging) { dragging = false; saveState(); }
+    });
+  }
+
+  function makeResizable(win, el) {
+    let sx, sy, rect, dir, resizing = false;
+    el.querySelectorAll('.rz').forEach(h => {
+      h.addEventListener('mousedown', e => {
+        resizing = true;
+        dir = h.dataset.dir;
+        sx = e.clientX; sy = e.clientY;
+        rect = { x: el.offsetLeft, y: el.offsetTop, w: el.offsetWidth, h: el.offsetHeight };
+        el.style.maxWidth = 'none';
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    });
+    window.addEventListener('mousemove', e => {
+      if (!resizing) return;
+      const dx = e.clientX - sx, dy = e.clientY - sy;
+      const minW = 280, minH = 180;
+      let { x, y, w, h } = rect;
+      if (dir.includes('e')) w = Math.max(minW, rect.w + dx);
+      if (dir.includes('s')) h = Math.max(minH, rect.h + dy);
+      if (dir.includes('w')) { w = Math.max(minW, rect.w - dx); x = rect.x + (rect.w - w); }
+      if (dir.includes('n')) { h = Math.max(minH, rect.h - dy); y = rect.y + (rect.h - h); }
+      Object.assign(el.style, { left: x + 'px', top: y + 'px', width: w + 'px', height: h + 'px' });
+    });
+    window.addEventListener('mouseup', () => {
+      if (resizing) { resizing = false; saveState(); }
+    });
+  }
+
+  /* ---------------- Taskbar & start menu ---------------- */
+
+  function addTaskbarItem(win) {
+    const btn = document.createElement('button');
+    btn.className = 'taskbar-item active';
+    btn.textContent = apps[win.appId].icon + ' ' + apps[win.appId].title;
+    btn.addEventListener('click', () => {
+      if (win.el.classList.contains('minimized')) {
+        win.el.classList.remove('minimized');
+        focusWindow(win);
+        if (win.appId === 'camera') cameraStart(win);
+      } else if (win.taskItem.classList.contains('active')) {
+        win.el.classList.add('minimized');
+        win.taskItem.classList.remove('active');
+        if (win.appId === 'camera') cameraStop();
+        saveState();
+      } else {
+        focusWindow(win);
+      }
+    });
+    taskItems.appendChild(btn);
+    win.taskItem = btn;
+  }
+
+  function buildStartMenu() {
+    startMenu.innerHTML = '';
+    Object.keys(apps).forEach(id => {
+      const b = document.createElement('button');
+      b.className = 'menu-app';
+      b.innerHTML = '<span style="font-size:18px">' + apps[id].icon + '</span> ' + apps[id].title;
+      b.addEventListener('click', () => {
+        startMenu.classList.remove('open');
+        createWindow(id);
+      });
+      startMenu.appendChild(b);
+    });
+  }
+
+  buildStartMenu();
+
+  startBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    startMenu.classList.toggle('open');
+  });
+  document.addEventListener('click', e => {
+    if (!startMenu.contains(e.target)) startMenu.classList.remove('open');
+  });
+
+  /* ---------------- App: Notatki ---------------- */
+
+  function renderNotes() {
+    const root = document.createElement('div');
+    root.className = 'app';
+    root.innerHTML =
+      '<textarea id="notes-area" placeholder="Pisz tutaj... Notatki zapisują się automatycznie."></textarea>' +
+      '<div class="notes-status">Zapisywane automatycznie w pamięci lokalnej</div>';
+    const area = root.querySelector('#notes-area');
+    if (state.notes) area.value = state.notes;
+    let t = null;
+    area.addEventListener('input', () => {
+      clearTimeout(t);
+      t = setTimeout(saveState, 400);
+    });
+    return root;
+  }
+
+  /* ---------------- App: Czat ---------------- */
+
+  let chatHistory = state.chat || [];
+
+  function botReply(msg) {
+    const lower = msg.toLowerCase();
+    if (lower.includes('czesc') || lower.includes('cześć') || lower.includes('witaj') || lower.includes('hej')) return 'Cześć! Jak mogę pomóc?';
+    if (lower.includes('imie') || lower.includes('imię')) return 'Jestem PrismBot — asystent systemu Prism OS.';
+    if (lower.includes('pomoc') || lower.includes('help')) return 'Mogę pogadać, zapamiętać historię rozmowy i towarzyszyć Ci w Prism OS. Spróbuj napisać "pogoda" albo "czas".';
+    if (lower.includes('czas') || lower.includes('godzina')) return 'Jest ' + new Date().toLocaleTimeString('pl-PL') + '.';
+    if (lower.includes('pogoda')) return 'W Prism OS zawsze jest słonecznie ☀️';
+    if (lower.includes('dzieki') || lower.includes('dzięki')) return 'Nie ma za co!';
+    if (lower.endsWith('?')) return 'Dobre pytanie. Na razie jestem prostym botem, ale robię co mogę!';
+    const fallback = ['Ciekawe! Rozwiń temat.', 'Rozumiem.', 'Gratisuję to spostrzeżenie.', 'Hmm, opowiedz więcej.'];
+    return fallback[Math.floor(Math.random() * fallback.length)];
+  }
+
+  function renderChat() {
+    const root = document.createElement('div');
+    root.className = 'app';
+    root.innerHTML =
+      '<div id="chat-log"></div>' +
+      '<form id="chat-form">' +
+        '<input id="chat-input" type="text" placeholder="Napisz wiadomość..." autocomplete="off">' +
+        '<button id="chat-send" type="submit">Wyślij</button>' +
+      '</form>';
+    const log = root.querySelector('#chat-log');
+    const input = root.querySelector('#chat-input');
+
+    function addMsg(text, cls) {
+      const div = document.createElement('div');
+      div.className = 'chat-msg ' + cls;
+      div.textContent = text;
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    chatHistory.forEach(m => addMsg(m.text, m.who));
+    if (!chatHistory.length) {
+      addMsg('Witaj w Prism Chat! Napisz cos, a odpowiem.', 'bot');
+      chatHistory.push({ who: 'bot', text: 'Witaj w Prism Chat! Napisz cos, a odpowiem.' });
+    }
+
+    root.querySelector('#chat-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+      addMsg(text, 'me');
+      chatHistory.push({ who: 'me', text: text });
+      input.value = '';
+      setTimeout(() => {
+        const reply = botReply(text);
+        addMsg(reply, 'bot');
+        chatHistory.push({ who: 'bot', text: reply });
+        saveState();
+      }, 450);
+      saveState();
+    });
+    return root;
+  }
+
+  /* ---------------- App: Aparat ---------------- */
+
+  let cameraStream = null;
+
+  function renderCamera() {
+    const root = document.createElement('div');
+    root.className = 'app';
+    root.innerHTML =
+      '<div class="app-body" style="position:relative;display:flex;">' +
+        '<video id="camera-video" autoplay playsinline muted></video>' +
+        '<img id="camera-snapshot" style="display:none;position:absolute;inset:0;" alt="Zdjęcie">' +
+      '</div>' +
+      '<div class="camera-error" style="display:none;">Brak dostępu do kamery.<br>Udziel uprawnień w przeglądarce.</div>' +
+      '<div class="camera-controls">' +
+        '<button id="camera-shot">📸 Zrób zdjęcie</button>' +
+        '<button id="camera-back" class="secondary" style="display:none;">↩︎ Wróć do podglądu</button>' +
+      '</div>';
+
+    const video = root.querySelector('#camera-video');
+    const snap = root.querySelector('#camera-snapshot');
+    const shot = root.querySelector('#camera-shot');
+    const back = root.querySelector('#camera-back');
+    const err = root.querySelector('.camera-error');
+
+    function snapshot() {
+      if (!cameraStream) return;
+      const c = document.createElement('canvas');
+      c.width = video.videoWidth || 640;
+      c.height = video.videoHeight || 480;
+      c.getContext('2d').drawImage(video, 0, 0, c.width, c.height);
+      snap.src = c.toDataURL('image/png');
+      video.style.visibility = 'hidden';
+      snap.style.display = 'block';
+      back.style.display = 'inline-block';
+    }
+
+    shot.addEventListener('click', snapshot);
+    back.addEventListener('click', () => {
+      snap.style.display = 'none';
+      video.style.visibility = 'visible';
+      back.style.display = 'none';
+    });
+
+    root.dataset.videoEl = '1';
+    cameraCurrentVideo = video;
+    cameraCurrentError = err;
+    if (windows.has('camera')) cameraStart(windows.get('camera'));
+    return root;
+  }
+
+  let cameraCurrentVideo = null;
+  let cameraCurrentError = null;
+
+  async function cameraStart(win) {
+    if (cameraStream) return;
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+      if (cameraCurrentVideo) cameraCurrentVideo.srcObject = cameraStream;
+    } catch (e) {
+      cameraStream = null;
+      if (cameraCurrentError) cameraCurrentError.style.display = 'flex';
+    }
+  }
+
+  function cameraStop() {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(t => t.stop());
+      cameraStream = null;
+    }
+    if (cameraCurrentVideo) cameraCurrentVideo.srcObject = null;
+  }
+
+  /* ---------------- App: Ustawienia ---------------- */
+
+  function renderSettings() {
+    const root = document.createElement('div');
+    root.className = 'app';
+
+    const labels = { aurora: 'Aurora', sunset: 'Zachód', ocean: 'Ocean', forest: 'Las', mono: 'Mono' };
+    const currentWp = (state.theme || {}).wallpaper || 'aurora';
+    const wpOptions = Object.keys(wallpapers).map(k =>
+      '<option value="' + k + '"' + (k === currentWp ? ' selected' : '') + '>' + labels[k] + '</option>').join('');
+
+    root.innerHTML =
+      '<div class="app-body">' +
+        '<div class="settings-row"><span>Kolor akcentu</span><input type="color" id="set-accent" value="' +
+          ((state.theme || {}).accent || '#7c6cff') + '"></div>' +
+        '<div class="settings-row"><span>Tapeta</span><select id="set-wallpaper">' + wpOptions + '</select></div>' +
+        '<div class="settings-row"><span>Resetuj wszystkie ustawienia</span><button id="set-reset" ' +
+          'class="secondary" style="background:#ff5f57;color:#fff;border:none;border-radius:8px;padding:8px 14px;cursor:pointer;">Reset</button></div>' +
+      '</div>';
+
+    root.querySelector('#set-accent').addEventListener('input', e => {
+      applyTheme({ accent: e.target.value, wallpaper: document.body.dataset.wallpaper });
+      saveState();
+    });
+    root.querySelector('#set-wallpaper').addEventListener('change', e => {
+      applyTheme({ accent: document.documentElement.style.getPropertyValue('--accent'), wallpaper: e.target.value });
+      saveState();
+    });
+    root.querySelector('#set-reset').addEventListener('click', () => {
+      if (!confirm('Przywrócić ustawienia domyślne? Historia czatu i notatki zostaną usunięte.')) return;
+      localStorage.removeItem(STORAGE_KEY);
+      chatHistory = [];
+      Array.from(windows.keys()).forEach(closeWindow);
+      applyTheme({});
+    });
+    return root;
+  }
+
+  /* ---------------- App: O systemie ---------------- */
+
+  function renderAbout() {
+    const root = document.createElement('div');
+    root.className = 'app';
+    root.innerHTML =
+      '<div class="about">' +
+        '<h1>💎 Prism OS</h1>' +
+        '<p>Prosty system okienkowy w przeglądarce.<br>' +
+        'Menedżer okien z przeciąganiem, zmianą rozmiaru<br>i minimalizacją. Ustawienia zapamiętywane lokalnie.</p>' +
+        '<p style="margin-top:12px;">Wersja 1.0</p>' +
+      '</div>';
+    return root;
+  }
+
+  /* ---------------- Boot ---------------- */
+
+  createWindow('about');
+})();
+</script>
+</body>
+</html>
