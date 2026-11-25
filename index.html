@@ -269,7 +269,10 @@ sidebar (najniższa warstwa) → tło treści bez efektu → sekcje ze
 szkłem i cieniem warstwy. */
 .set-content { flex:1; min-width:0; display:flex; flex-direction:column; margin:10px 10px 10px 0; border:1px solid var(--border); border-radius:10px; background:var(--content); overflow:hidden; position:relative;
 box-shadow: 0 8px 28px color-mix(in srgb, var(--accent) 10%, transparent), 0 2px 8px rgba(0,0,0,.15); }
-.set-side { width:230px; flex-shrink:0; display:flex; flex-direction:column; background:var(--side); border-right:1px solid var(--border); box-shadow:var(--sh-1); border-radius:10px; margin:10px 0 10px 10px; overflow:hidden; }
+/* Sidebar ustawień — integralna część ramki okna (jak w Filerze):
+  bez własnych marginesów, zaokrąglenia i cienia; jedynie delikatne
+  tło i separator treści. */
+.set-side { width:230px; flex-shrink:0; display:flex; flex-direction:column; background:var(--side); border-right:1px solid var(--border); overflow:hidden; }
 .profile { margin:10px 10px 6px; padding:9px 10px; display:flex; align-items:center; gap:10px; border-radius:10px; cursor:pointer; transition:background .15s; }
 .profile:hover { background:var(--hover); }
 .avatar { width:34px; height:34px; border-radius:50%; flex-shrink:0; background:var(--accent); color:#fff; font-weight:700; font-size:14px; display:grid; place-items:center; }
